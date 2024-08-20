@@ -9,36 +9,16 @@ import { useColorScheme } from '@/hooks/useColorScheme';
 import { KaraokeContext } from '@/hooks/Context/Karaoke';
 import { RecordingContext } from '@/hooks/Context/Recording';
 // Prevent the splash screen from auto-hiding before asset loading is complete.
-SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
   const colorScheme = useColorScheme();
-  const [loaded] = useFonts({
-    SpaceMono: require('../assets/fonts/SpaceMono-Regular.ttf'),
-  });
 
-  useEffect(() => {
-    if (loaded) {
-      SplashScreen.hideAsync();
-    }
-  }, [loaded]);
-
-  if (!loaded) {
-    return null;
-  }
 
   return (
     <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-      <KaraokeContext>
-      <RecordingContext>
       <Stack>
-        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-        <Stack.Screen name="screens" options={{headerShown: false}} />
-        <Stack.Screen name="+not-found" />
+        <Stack.Screen name="index" options={{presentation: "fullScreenModal", title: "Preview", animation: 'slide_from_left', headerBackVisible: false}} />
       </Stack>
-      </RecordingContext>
-      </KaraokeContext>
-      
     </ThemeProvider>
   );
 }
