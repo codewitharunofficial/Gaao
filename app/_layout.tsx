@@ -4,7 +4,7 @@ import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { useEffect } from 'react';
 import 'react-native-reanimated';
-
+import {ModalPortal} from 'react-native-modals'
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { KaraokeContext } from '@/hooks/Context/Karaoke';
 import { RecordingContext } from '@/hooks/Context/Recording';
@@ -36,6 +36,7 @@ export default function RootLayout() {
         <Stack.Screen name="screens" options={{headerShown: false}} />
         <Stack.Screen name="+not-found" />
       </Stack>
+      <ModalPortal />
       </RecordingContext>
       </KaraokeContext>
       

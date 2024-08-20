@@ -8,11 +8,17 @@ import {
   ScrollView,
   Text,
   TouchableOpacity,
+  PermissionsAndroid,
 } from "react-native";
 import ParallaxScrollView from "@/components/ParallaxScrollView";
 import { ThemedText } from "@/components/ThemedText";
 import { ThemedView } from "@/components/ThemedView";
-import { Link, useGlobalSearchParams, useLocalSearchParams, useNavigation } from "expo-router";
+import {
+  Link,
+  useGlobalSearchParams,
+  useLocalSearchParams,
+  useNavigation,
+} from "expo-router";
 import SimpleLineIcons from "@expo/vector-icons/SimpleLineIcons";
 import Entypo from "@expo/vector-icons/Entypo";
 import { useContext, useEffect, useState } from "react";
@@ -22,7 +28,9 @@ import { RecordedTrack } from "@/hooks/Context/Recording";
 import PreviewScreen from "./preview";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import * as FileSystem from "expo-file-system";
+import * as MediaLibrary from "expo-media-library";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import {useThemeColor} from '@/hooks/useThemeColor';
 
 export default function Record() {
   const { title, lyrics, artists, url, coverPhoto } = useLocalSearchParams();
@@ -37,14 +45,15 @@ export default function Record() {
   const { position, setPosition } = useContext(TrackControls);
   const { recordedTrack, setRecordedTrack } = useContext(RecordedTrack);
   const [isRecording, setIsRecording] = useState(false);
-  const {vocals, setVocals} = useContext(RecordedTrack);
+  const { vocals, setVocals } = useContext(RecordedTrack);
   const [finished, setFinished] = useState(false);
 
+  const theme = useThemeColor({light: 'black', dark: 'white'});
 
   const checkIfAvailable = async () => {
     try {
       const data = await AsyncStorage.getItem(`${title}`);
-      if(data){
+      if (data) {
         const uri = JSON.parse(data);
         setSaveMusic(uri);
         return true;
@@ -55,18 +64,17 @@ export default function Record() {
     } catch (error) {
       console.log(error);
     }
-  }
+  };
 
-  async function downloadMusic(){
-
+  async function downloadMusic() {
     try {
       const isAvailable = await checkIfAvailable();
       console.log(isAvailable);
-      if(!isAvailable){
+      if (!isAvailable) {
         const fileUri = `${FileSystem.cacheDirectory}${title}.mp3`;
-        const {uri} = await FileSystem.downloadAsync(url, fileUri);
+        const { uri } = await FileSystem.downloadAsync(url, fileUri);
         console.log("Audio File Saved To:", uri);
-        await AsyncStorage.setItem(`${title}`,  JSON.stringify(uri));
+        await AsyncStorage.setItem(`${title}`, JSON.stringify(uri));
         setSaveMusic(uri);
       } else {
         return;
@@ -76,24 +84,40 @@ export default function Record() {
     }
   }
 
+  async function loadMusic() {
+    try {
+      const { sound, status } = await Audio.Sound.createAsync(
+        { uri: saveMusic },
+        { shouldPlay: false }
+      );
+      if (status.isLoaded) {
+        setCurrentSound(sound);
+      }
+      console.log("Song Loaded Successfully");
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
   useEffect(() => {
-     downloadMusic()
+    downloadMusic();
   }, []);
+
+  useEffect(() => {
+    if (saveMusic) {
+      loadMusic();
+    }
+  }, [saveMusic]);
 
   const autoPlayTrack = async () => {
     try {
-      const { sound, status } = await Audio.Sound.createAsync(
-        { uri: url },
-        { shouldPlay: true }
-      );
-      setCurrentSound(sound);
-      await sound.playAsync();
-      sound.setOnPlaybackStatusUpdate((status) => {
+      await currentSound.playAsync();
+      currentSound.setOnPlaybackStatusUpdate((status) => {
         if (status.isLoaded && status.isPlaying) {
           setPlaying(true);
           setPosition(status.positionMillis);
         } else if (status.isLoaded && status.didJustFinish) {
-          sound.unloadAsync();
+          currentSound.unloadAsync();
           setPlaying(false);
         }
       });
@@ -131,8 +155,9 @@ export default function Record() {
   //asking for permission to record audio
   const getAudioPermissions = async () => {
     try {
-      if (permissionResponse?.granted === false) {
-        const permission = await requestPermission();
+      const { granted } = await permissionResponse;
+      if (!granted) {
+        await requestPermission();
       }
     } catch (error) {
       console.log(error);
@@ -171,34 +196,33 @@ export default function Record() {
   };
 
   const stopSinging = async () => {
-  try {
-     await recordedTrack.stopAndUnloadAsync();
-     await currentSound.stopAsync();
-     await currentSound.unloadAsync();
-     setPlaying(false);
-     setIsRecording(false);
-     const uri = recordedTrack.getURI();
+    try {
+      await recordedTrack.stopAndUnloadAsync();
+      await currentSound.stopAsync();
+      await currentSound.unloadAsync();
+      setPlaying(false);
+      setIsRecording(false);
+      const uri = recordedTrack.getURI();
 
-     if(uri){
-      const fileUri = `${FileSystem.documentDirectory}${title}_vocals${Math.floor(Math.random() * 10)}.mp3`;
-      await FileSystem.moveAsync({from: uri, to: fileUri});
-      setVocals(fileUri);
-      console.log("Vocals Saved at:", fileUri);
-     }
-    
-     setFinished(true);
+      if (uri) {
+        const fileUri = `${
+          FileSystem.documentDirectory
+        }${title}_vocals${Math.floor(Math.random() * 10)}.mp3`;
+        await FileSystem.moveAsync({ from: uri, to: fileUri });
+        setVocals(fileUri);
+        console.log("Vocals Saved at:", fileUri);
+      }
 
-
-  } catch (error) {
-    console.log(error);
-  }
-  }
+      setFinished(true);
+    } catch (error) {
+      console.log(error);
+    }
+  };
 
   useEffect(() => {
-    if(finished) {
-      
+    if (finished) {
     }
-  }, [finished])
+  }, [finished]);
 
   return (
     <SafeAreaView style={{ width: "100%", height: "100%" }}>
@@ -286,13 +310,27 @@ export default function Record() {
                 borderRightColor: "black",
               }}
             >
-              <Ionicons name="pause" size={40} color={"white"} />
-              <Text style={{ color: "white" }}>Pause</Text>
+              <Ionicons name="pause" size={40} color={theme} />
+              <Text style={{ color: theme }}>Pause</Text>
             </TouchableOpacity>
-          ) : (
+          ) : finished ? (<TouchableOpacity
+            onPress={ async () => {await currentSound.setPositionAsync(0); await recordedTrack.stopAndUnloadAsync(); setFinished(false)}}
+            style={{
+              width: "30%",
+              height: "100%",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              borderRightWidth: StyleSheet.hairlineWidth,
+              borderRightColor: "black",
+            }}
+          >
+            <Ionicons name="reload-circle-outline" size={40} color={theme} />
+            <Text style={{ color: "white" }}>Reset?</Text>
+          </TouchableOpacity>) : (
             <TouchableOpacity
               onPress={() => {
-                resumeTrack();
+                pause ? resumeTrack() : autoPlayTrack();
               }}
               style={{
                 width: "30%",
@@ -304,12 +342,14 @@ export default function Record() {
                 borderRightColor: "black",
               }}
             >
-              <Ionicons name="play" size={40} color={"white"} />
+              <Ionicons name="play" size={40} color={theme} />
               <Text style={{ color: "white" }}>Play</Text>
             </TouchableOpacity>
           )}
           <TouchableOpacity
-            onPress={() => {isRecording ? stopSinging() : singAlong()}}
+            onPress={() => {
+              isRecording ? stopSinging() : singAlong();
+            }}
             style={{
               width: "30%",
               height: "90%",
@@ -323,24 +363,42 @@ export default function Record() {
             }}
           >
             <Entypo name="modern-mic" size={50} color={"black"} />
-            <Text style={{ color: "black" }}>{isRecording ? "Finish" : "Start"}</Text>
+            <Text style={{ color: "black" }}>
+              {isRecording ? "Finish" : "Start"}
+            </Text>
           </TouchableOpacity>
-          <Link href={{pathname: '/screens/preview', params: {vocals: vocals, music: saveMusic, coverPhoto: coverPhoto, title: title, artists: artists}}} asChild >
-          <TouchableOpacity
-            style={{
-              width: "30%",
-              height: "100%",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
+          <Link
+            href={{
+              pathname: "/screens/preview",
+              params: {
+                vocals: vocals,
+                music: saveMusic,
+                coverPhoto: coverPhoto,
+                title: title,
+                artists: artists,
+              },
             }}
+            asChild
           >
-            {
-              finished ? <MaterialIcons name="preview" size={40} color={'white'} /> : <Ionicons name="musical-note" size={40} color={"white"} />
-            }
-            <Text style={{ color: "white" }}>{finished ? "Preview" : "Key"}</Text>
-          </TouchableOpacity>
-            </Link>
+            <TouchableOpacity
+              style={{
+                width: "30%",
+                height: "100%",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
+              {finished ? (
+                <MaterialIcons name="preview" size={40} color={theme} />
+              ) : (
+                <Ionicons name="musical-note" size={40} color={theme} />
+              )}
+              <Text style={{ color: theme }}>
+                {finished ? "Preview" : "Key"}
+              </Text>
+            </TouchableOpacity>
+          </Link>
         </View>
       </View>
     </SafeAreaView>

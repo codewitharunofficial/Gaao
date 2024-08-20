@@ -1,4 +1,4 @@
-import { Image, StyleSheet, Platform, Button, TouchableOpacity } from 'react-native';
+import { Image, StyleSheet, Platform, Button, TouchableOpacity, ScrollView, SafeAreaView, View } from 'react-native';
 import WelcomeScreen from '@/components/Welcome';
 import ParallaxScrollView from '@/components/ParallaxScrollView';
 import { useEffect, useState } from 'react';
@@ -16,7 +16,7 @@ export default function HomeScreen() {
     try {
     //   const response = await fetch('http://192.168.43.224:6969/api/v1/karaoke/get-tracks');
     // console.log(response);
-    const {data} = await axios.get('http://192.168.43.224:6969/api/v1/karaoke/get-tracks');
+    const {data} = await axios.get('http://192.168.76.47:6969/api/v1/karaoke/get-tracks');
     if(data && data?.success){
       setTracks(data.tracks);
     }
@@ -33,18 +33,17 @@ export default function HomeScreen() {
     userType === "New" ? (
       <WelcomeScreen />
     ) : (
-      <ParallaxScrollView
-      headerBackgroundColor={{ light: '#A1CEDC', dark: '#1D3D47' }}
-      headerImage={
+      <SafeAreaView style={{width: '100%', height: '100%'}} >
+      <View style={{width: '100%', height: '100%', paddingHorizontal: 10}} >
         <Image
           source={require('@/assets/images/newly-added.webp')}
           style={styles.reactLogo}
         />
-      }>
-        <ThemedView style={{width: '100%', height: 100, flexDirection: 'row', justifyContent: 'space-between', borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: 'white'}} >
+        <ThemedView style={{width: '100%', height: '10%', flexDirection: 'row', justifyContent: 'space-between', borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: 'white'}} >
           <ShortcutStrips title={"Favourites"} icon={"heart"} color={'black'} />
           <ShortcutStrips title={"Recorded"} icon={'mic'} color={''} />
         </ThemedView>
+        <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{width: '100%', height: 'auto', flexDirection: 'column', gap: 15, alignItems: 'center'}} >
         {
           tracks.length > 0 && (
             tracks.map((track, idx) => (
@@ -52,7 +51,10 @@ export default function HomeScreen() {
             ))
           )
         }
-    </ParallaxScrollView>
+        </ScrollView>
+        
+    </View>
+      </SafeAreaView>
     )
     
   );
@@ -64,15 +66,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 8,
   },
-  stepContainer: {
-    gap: 8,
-    marginBottom: 8,
-  },
   reactLogo: {
-    height: '100%',
+    height: '30%',
     width: '100%',
-    bottom: 0,
-    left: 0,
-    position: 'absolute',
+    marginBottom: '2%',
+    marginTop: '5%'
   },
 });

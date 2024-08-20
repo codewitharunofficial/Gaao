@@ -18,6 +18,7 @@ export default function RootLayout() {
     <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
       <Stack>
         <Stack.Screen name="index" options={{presentation: "fullScreenModal", title: "Preview", animation: 'slide_from_left', headerBackVisible: false}} />
+        <Stack.Screen name="reverb" options={{headerShown: false}} />
       </Stack>
     </ThemeProvider>
   );

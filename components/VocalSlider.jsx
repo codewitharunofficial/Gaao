@@ -5,10 +5,9 @@ import MaterialIcons from '@expo/vector-icons/MaterialIcons'
 import Slider from '@react-native-community/slider'
 import Ionicons from '@expo/vector-icons/Ionicons'
 import { Audio } from 'expo-av'
+import WaveForm from './WaveForm'
 
 const VocalSlider = ({url}) => {
-
-  console.log(url);
 
   const [isMusicPlaying, setIsMusicPlaying] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
@@ -56,14 +55,17 @@ const pauseVocals = async () => {
   return (
     <View style={{flex: 0.5, width: '90%', borderRadius: 10, padding: 10, flexDirection: 'column', gap: 10 }} >
       <ThemedText style={{fontSize: 18, fontWeight: '400', color: 'white', textAlign: 'center'}} >Vocals</ThemedText>
-        <View style={{width: '100%', height: "60%", padding: 0, backgroundColor: 'lightgreen', borderRadius: 10, flexDirection: 'row', alignItems: 'center'}} >
+        <View style={{width: '100%', height: "60%", padding: 0, backgroundColor: 'lightgreen', borderRadius: 10, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 10}} >
         <View style={{width: '20%', height: '100%', backgroundColor: 'orange', alignItems: 'center', justifyContent: 'center'}} >
         <MaterialIcons name='multitrack-audio' size={30} color={'black'} />
         </View>
         {
           isMusicPlaying ? <Ionicons onPress={() => pauseVocals()} name='pause' size={30} color={'black'} /> : <Ionicons onPress={() => playVocals()} name='play' size={30} color={'black'} />
         }
-        <Slider style={{width: '70%', height: '20%'}} />
+        <View style={{width: '70%', height: '75%', alignItems: 'center',}} >
+       <WaveForm uri={url} />
+      <Slider style={{width: '100%', height: '20%', position: 'absolute', bottom: '40%', borderColor: 'blue'}} />
+        </View>
         </View>
         
       </View>

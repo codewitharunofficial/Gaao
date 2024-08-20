@@ -2,13 +2,13 @@
   "expo": {
     "name": "gaao",
     "slug": "gaao",
-    "version": "1.0.0",
+    "version": "1.0.2",
     "orientation": "portrait",
-    "icon": "./assets/images/Gaao-Logo.png",
+    "icon": "./assets/images/icon.png",
     "scheme": "gaao",
     "userInterfaceStyle": "automatic",
     "splash": {
-      "image": "./assets/images/Gaao-Logo.png",
+      "image": "./assets/images/icon.png",
       "resizeMode": "cover",
       "backgroundColor": "#ffffff"
     },
@@ -47,9 +47,7 @@
         "projectId": "a474f8a6-a1e2-4e4a-a978-67ff2d82879a"
       }
     },
-    "runtimeVersion": {
-      "policy": "appVersion"
-    },
+    "runtimeVersion": "1.0.2",
     "updates": {
       "url": "https://u.expo.dev/a474f8a6-a1e2-4e4a-a978-67ff2d82879a"
     }

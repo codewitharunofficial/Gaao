@@ -6,11 +6,11 @@ const RecordingContext = ({children}) => {
 
     const [recordedTrack, setRecordedTrack] = useState({});
     const [vocals, setVocals] = useState();
-    // const [position, setPosition] = useState(0);
+    const [processedVocals, setProcessedVocals] = useState();
 
     return (
 
-    <RecordedTrack.Provider value={{recordedTrack, setRecordedTrack, vocals, setVocals}} >
+    <RecordedTrack.Provider value={{recordedTrack, setRecordedTrack, vocals, setVocals, processedVocals, setProcessedVocals}} >
       {children}
     </RecordedTrack.Provider>
     )

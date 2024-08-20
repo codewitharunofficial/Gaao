@@ -24,7 +24,7 @@ const TrackCard = ({ coverPhoto, title, artists, lyrics, url, duration }) => {
       >
     
         {coverPhoto ? (
-          <Image source={{ uri: coverPhoto }} width={80} height={80} />
+          <Image source={{ uri: coverPhoto }} width={80} height={80} resizeMode="stretch" />
         ) : (
           <ThemedView
             style={{
