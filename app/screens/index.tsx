@@ -37,7 +37,6 @@ export default function Record() {
 
   const [fullScreen, setFullScreen] = useState(false);
   const [saveMusic, setSaveMusic] = useState();
-  const [isAvailable, setIsAvailable] = useState(false);
   const [permissionResponse, requestPermission] = Audio.usePermissions();
   const [playing, setPlaying] = useState(false);
   const [pause, setPause] = useState(false);
@@ -47,6 +46,7 @@ export default function Record() {
   const [isRecording, setIsRecording] = useState(false);
   const { vocals, setVocals } = useContext(RecordedTrack);
   const [finished, setFinished] = useState(false);
+  const { processedVocals, setProcessedVocals } = useContext(RecordedTrack);
 
   const theme = useThemeColor({light: 'black', dark: 'white'});
 
@@ -219,10 +219,10 @@ export default function Record() {
     }
   };
 
+
   useEffect(() => {
-    if (finished) {
-    }
-  }, [finished]);
+    setProcessedVocals(null);
+  }, []);
 
   return (
     <SafeAreaView style={{ width: "100%", height: "100%" }}>

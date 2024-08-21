@@ -7,6 +7,7 @@ import { Audio } from 'expo-av';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import WaveForm from './WaveForm';
 import { TrackControls } from '@/hooks/Context/Karaoke';
+import { Visualizer } from '@/hooks/Context/WaveForm';
 
 const MusicSlider = ({title, url}) => {
     const [isMusicPlaying, setIsMusicPlaying] = useState(false);
@@ -15,6 +16,7 @@ const MusicSlider = ({title, url}) => {
     const [volume, setVolume] = useState(0);
     const {currentSound, setCurrentSound} = useContext(TrackControls)
     const [sound, setSound] = useState();
+    const {setMusicWave} = useContext(Visualizer);
 
     const playMusic = async () => {
         try {
@@ -77,7 +79,7 @@ const MusicSlider = ({title, url}) => {
           isMusicPlaying ? <Ionicons onPress={() => pauseMusic()} name='pause' size={30} color={'black'} /> : <Ionicons onPress={() => playMusic()} name='play' size={30} color={'white'} />
         }
         <View style={{width: '70%', height: '75%', alignItems: 'center',}} >
-       <WaveForm uri={url} />
+       <WaveForm uri={url} setMusicWave={setMusicWave} />
       <Slider value={volume} maximumValue={1}  minimumValue={0} onValueChange={value => setVolume(value)} style={{width: '100%', height: '20%', position: 'absolute', bottom: '40%', borderColor: 'blue'}} />
         </View>
         </View>

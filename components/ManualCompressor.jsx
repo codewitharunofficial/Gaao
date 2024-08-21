@@ -3,17 +3,19 @@ import { View, Text, StyleSheet, Button, ScrollView } from 'react-native';
 import Slider from '@react-native-community/slider';
 import * as FileSystem from 'expo-file-system';
 
-const ManualReverb = ({ onApplyReverb, vocals, title }) => {
-    const [roomSize, setRoomSize] = useState(50);
-    const [damping, setDamping] = useState(50);
-    const [wetLevel, setWetLevel] = useState(50);
-    const [dryLevel, setDryLevel] = useState(50);
+const ManualCompressor = ({ onApplyCompressor, vocals, title }) => {
+    const [ratio, setRatio] = useState(1);
+    const [attack, setAttack] = useState(8);
+    const [threshold, setThreshold] = useState(3);
+    const [release, setRelease] = useState(0);
+    const [makeupGain, setMakeUpGain] = useState(0);
 
-    const reverbSettings = {
-        roomSize,
-        damping,
-        wetLevel,
-        dryLevel
+    const compressorSettings = {
+        ratio,
+        attack,
+        threshold,
+        release,
+        makeupGain
     };
 
     // useEffect(() => {
@@ -28,46 +30,57 @@ const ManualReverb = ({ onApplyReverb, vocals, title }) => {
 
     return (
         <View style={styles.container}>
-            <Text style={styles.label}>Room Size</Text>
+            <Text style={styles.label}>Ratio</Text>
             <Slider
                 style={styles.slider}
                 minimumValue={0}
                 maximumValue={100}
-                value={roomSize}
-                onValueChange={value => {setRoomSize(value)}}
+                value={ratio}
+                onValueChange={value => {setRatio(value)}}
                 minimumTrackTintColor="#1fb28a"
                 maximumTrackTintColor="#d3d3d3"
                 thumbTintColor="#b9e4c9"
             />
-            <Text style={styles.label}>Damping</Text>
+            <Text style={styles.label}>Threshold</Text>
             <Slider
                 style={styles.slider}
                 minimumValue={0}
                 maximumValue={100}
-                value={damping}
-                onValueChange={value => {setDamping(value)}}
+                value={threshold}
+                onValueChange={value => {setThreshold(value)}}
                 minimumTrackTintColor="#1fb28a"
                 maximumTrackTintColor="#d3d3d3"
                 thumbTintColor="#b9e4c9"
             />
-            <Text style={styles.label}>Wet Level</Text>
+            <Text style={styles.label}>Attack</Text>
             <Slider
                 style={styles.slider}
                 minimumValue={0}
                 maximumValue={100}
-                value={wetLevel}
-                onValueChange={value => {setWetLevel(value)}}
+                value={attack}
+                onValueChange={value => {setAttack(value)}}
                 minimumTrackTintColor="#1fb28a"
                 maximumTrackTintColor="#d3d3d3"
                 thumbTintColor="#b9e4c9"
             />
-            <Text style={styles.label}>Dry Level</Text>
+            <Text style={styles.label}>Release</Text>
             <Slider
                 style={styles.slider}
                 minimumValue={0}
                 maximumValue={100}
-                value={dryLevel}
-                onValueChange={value => {setDryLevel(value)}}
+                value={release}
+                onValueChange={value => {setRelease(value)}}
+                minimumTrackTintColor="#1fb28a"
+                maximumTrackTintColor="#d3d3d3"
+                thumbTintColor="#b9e4c9"
+            />
+            <Text style={styles.label}>Make-Up-Gain</Text>
+            <Slider
+                style={styles.slider}
+                minimumValue={0}
+                maximumValue={100}
+                value={makeupGain}
+                onValueChange={value => {setMakeUpGain(value)}}
                 minimumTrackTintColor="#1fb28a"
                 maximumTrackTintColor="#d3d3d3"
                 thumbTintColor="#b9e4c9"
@@ -95,4 +108,4 @@ const styles = StyleSheet.create({
     },
 });
 
-export default ManualReverb;
+export default ManualCompressor;

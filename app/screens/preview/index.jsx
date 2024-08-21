@@ -23,6 +23,8 @@ import { RecordedTrack } from "@/hooks/Context/Recording";
 import { BottomModal, ModalContent } from "react-native-modals";
 import { useThemeColor } from "@/hooks/useThemeColor";
 import ReverbModel from "@/components/Models/ReverbModel";
+import CompressorModal from "@/components/Models/CompressorModel";
+import EqualizerModel from "@/components/Models/EqualizerModel";
 
 const PreviewScreen = () => {
   const { AudioProcessor } = NativeModules;
@@ -33,33 +35,80 @@ const PreviewScreen = () => {
   const theme = useThemeColor({ light: "lightblue", dark: "#000" });
   const modalColor = useThemeColor({ light: "yellow", dark: "lightblue" });
 
+  const [vocalLoaded, setVocalLoaded] = useState(false);
+  const [musicLoaded, setMusicLoaded] = useState(false);
+  const [loadedMusic, setLoadedMusic] = useState();
+  const [loadedVocals, setLoadedVocals] = useState();
+
   const [reverbPreset, setReverbPreset] = useState("");
   const [applyReverb, setApplyReverb] = useState(false);
+  const [applyCompressor, setApplyCompressor] = useState(false);
+  const [sync, setSync] = useState(false);
+  const [applyEQ, setApplyEQ] = useState(false);
   const { processedVocals, setProcessedVocals } = useContext(RecordedTrack);
 
-
-  const autoPlayMix = async () => {
+  async function loadMusic() {
     try {
+      if (loadedMusic) {
+        await loadedMusic.stopAsync();
+        loadedMusic.replayAsync();
+      }
       const { sound, status } = await Audio.Sound.createAsync(
-        { uri: processedVocals },
-        {
-          shouldPlay: false,
-        }
+        { uri: music },
+        { shouldPlay: false }
       );
-      if (status) {
-        await sound.playAsync();
+      if (status.isLoaded) {
+        setMusicLoaded(true);
+        setLoadedMusic(sound);
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
+  async function loadProcessedVocals() {
+    try {
+      if (loadedVocals) {
+        await loadedVocals.stopAsync();
+        loadedVocals.unloadAsync();
+      } else {
+        const { sound, status } = await Audio.Sound.createAsync(
+          { uri: processedVocals },
+          {
+            shouldPlay: false,
+          }
+        );
+        if (status.isLoaded) {
+          setVocalLoaded(true);
+          setLoadedVocals(sound);
+          await loadMusic();
+          if (loadedMusic) {
+            await loadedMusic.playAsync();
+            await sound.playAsync();
+          }
+        }
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
+  const playMix = async () => {
+    try {
+      await loadMusic();
+      if (loadedMusic) {
+        await loadProcessedVocals();
       }
     } catch (error) {
       console.log(error);
     }
   };
 
-  useEffect(() => {
-    if (processedVocals) {
-      autoPlayMix();
-    }
-  }, [processedVocals]);
-
+  // useEffect(() => {
+  //   if(processedVocals){
+  //     loadProcessedVocals();
+  //   }
+  // }, [processedVocals]);
 
   const efx = [
     {
@@ -70,17 +119,17 @@ const PreviewScreen = () => {
     {
       id: 1,
       title: "Compressor",
-      onPress: () => setApplyReverb(!applyReverb),
+      onPress: () => setApplyCompressor(!applyCompressor),
     },
     {
       id: 2,
-      title: "Synncronize",
-      onPress: () => setApplyReverb(!applyReverb),
+      title: "Syncronize",
+      onPress: () => setSync(!sync),
     },
     {
       id: 3,
       title: "Equalizer",
-      onPress: () => setApplyReverb(!applyReverb),
+      onPress: () => setApplyEQ(!applyEQ),
     },
   ];
 
@@ -107,7 +156,7 @@ const PreviewScreen = () => {
           }}
         >
           <MusicSlider url={music} title={title} />
-          <VocalSlider url={vocals} />
+          <VocalSlider url={processedVocals ? processedVocals : vocals} />
         </View>
         <View
           style={{ display: "flex", justifyContent: "flex-end", margin: 0 }}
@@ -122,6 +171,26 @@ const PreviewScreen = () => {
               title={title}
             />
           )}
+          {applyCompressor && (
+            <CompressorModal
+              applyCompressor={applyCompressor}
+              setApplyCompressor={setApplyCompressor}
+              modalColor={modalColor}
+              height={height}
+              vocals={vocals}
+              title={title}
+            />
+          )}
+          {
+            applyEQ && (
+              <EqualizerModel applyEQ={applyEQ}
+              setApplyEQ={setApplyEQ}
+              modalColor={modalColor}
+              height={height}
+              vocals={vocals}
+              title={title} />
+            )
+          }
         </View>
         <View
           style={{

@@ -1,11 +1,14 @@
 import { StyleSheet, Text, View } from 'react-native'
-import React, { useState } from 'react'
+import React, { useContext, useEffect, useState } from 'react'
 import { ThemedText } from './ThemedText'
 import MaterialIcons from '@expo/vector-icons/MaterialIcons'
 import Slider from '@react-native-community/slider'
 import Ionicons from '@expo/vector-icons/Ionicons'
 import { Audio } from 'expo-av'
 import WaveForm from './WaveForm'
+import { TrackControls } from '@/hooks/Context/Karaoke'
+import { RecordedTrack } from '@/hooks/Context/Recording'
+import { Visualizer } from '@/hooks/Context/WaveForm'
 
 const VocalSlider = ({url}) => {
 
@@ -13,6 +16,8 @@ const VocalSlider = ({url}) => {
   const [isPaused, setIsPaused] = useState(false);
   const [position, setPosition] = useState(0);
   const [sound, setSound] = useState();
+  const {processedVocals, setProcessedVocals} = useContext(RecordedTrack);
+  const {setVocalsWave} = useContext(Visualizer);
 
   const playVocals = async () => {
     try {
@@ -52,6 +57,8 @@ const pauseVocals = async () => {
   }
 }
 
+useEffect(() => {})
+
   return (
     <View style={{flex: 0.5, width: '90%', borderRadius: 10, padding: 10, flexDirection: 'column', gap: 10 }} >
       <ThemedText style={{fontSize: 18, fontWeight: '400', color: 'white', textAlign: 'center'}} >Vocals</ThemedText>
@@ -63,7 +70,7 @@ const pauseVocals = async () => {
           isMusicPlaying ? <Ionicons onPress={() => pauseVocals()} name='pause' size={30} color={'black'} /> : <Ionicons onPress={() => playVocals()} name='play' size={30} color={'black'} />
         }
         <View style={{width: '70%', height: '75%', alignItems: 'center',}} >
-       <WaveForm uri={url} />
+       <WaveForm uri={url} setVocalsWave={setVocalsWave} />
       <Slider style={{width: '100%', height: '20%', position: 'absolute', bottom: '40%', borderColor: 'blue'}} />
         </View>
         </View>

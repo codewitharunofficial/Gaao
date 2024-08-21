@@ -3,17 +3,15 @@ import { View, Text, StyleSheet, Button, ScrollView } from 'react-native';
 import Slider from '@react-native-community/slider';
 import * as FileSystem from 'expo-file-system';
 
-const ManualReverb = ({ onApplyReverb, vocals, title }) => {
-    const [roomSize, setRoomSize] = useState(50);
-    const [damping, setDamping] = useState(50);
-    const [wetLevel, setWetLevel] = useState(50);
-    const [dryLevel, setDryLevel] = useState(50);
+const ManualEqualizer = ({ onApplyEqualizer, vocals, title }) => {
+    const [bassGain, setBassGain] = useState(1);
+    const [treble, setTreble] = useState(8);
+    const [midGain, setMidGain] = useState(3);
 
-    const reverbSettings = {
-        roomSize,
-        damping,
-        wetLevel,
-        dryLevel
+    const eqSettings = {
+        bassGain,
+        treble,
+        midGain,
     };
 
     // useEffect(() => {
@@ -28,46 +26,35 @@ const ManualReverb = ({ onApplyReverb, vocals, title }) => {
 
     return (
         <View style={styles.container}>
-            <Text style={styles.label}>Room Size</Text>
+            <Text style={styles.label}>Bass-Gain</Text>
             <Slider
                 style={styles.slider}
                 minimumValue={0}
                 maximumValue={100}
-                value={roomSize}
-                onValueChange={value => {setRoomSize(value)}}
+                value={bassGain}
+                onValueChange={value => {setBassGain(value)}}
                 minimumTrackTintColor="#1fb28a"
                 maximumTrackTintColor="#d3d3d3"
                 thumbTintColor="#b9e4c9"
             />
-            <Text style={styles.label}>Damping</Text>
+            <Text style={styles.label}>Mid-Gain</Text>
             <Slider
                 style={styles.slider}
                 minimumValue={0}
                 maximumValue={100}
-                value={damping}
-                onValueChange={value => {setDamping(value)}}
+                value={midGain}
+                onValueChange={value => {setMidGain(value)}}
                 minimumTrackTintColor="#1fb28a"
                 maximumTrackTintColor="#d3d3d3"
                 thumbTintColor="#b9e4c9"
             />
-            <Text style={styles.label}>Wet Level</Text>
+            <Text style={styles.label}>Treble-Gain</Text>
             <Slider
                 style={styles.slider}
                 minimumValue={0}
                 maximumValue={100}
-                value={wetLevel}
-                onValueChange={value => {setWetLevel(value)}}
-                minimumTrackTintColor="#1fb28a"
-                maximumTrackTintColor="#d3d3d3"
-                thumbTintColor="#b9e4c9"
-            />
-            <Text style={styles.label}>Dry Level</Text>
-            <Slider
-                style={styles.slider}
-                minimumValue={0}
-                maximumValue={100}
-                value={dryLevel}
-                onValueChange={value => {setDryLevel(value)}}
+                value={treble}
+                onValueChange={value => {setTreble(value)}}
                 minimumTrackTintColor="#1fb28a"
                 maximumTrackTintColor="#d3d3d3"
                 thumbTintColor="#b9e4c9"
@@ -95,4 +82,4 @@ const styles = StyleSheet.create({
     },
 });
 
-export default ManualReverb;
+export default ManualEqualizer;
