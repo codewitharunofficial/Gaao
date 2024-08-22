@@ -338,12 +338,10 @@ export default function Record() {
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
-                borderRightWidth: StyleSheet.hairlineWidth,
-                borderRightColor: "black",
               }}
             >
               <Ionicons name="play" size={40} color={theme} />
-              <Text style={{ color: "white" }}>Play</Text>
+              <Text style={{ color: theme }}>Play</Text>
             </TouchableOpacity>
           )}
           <TouchableOpacity

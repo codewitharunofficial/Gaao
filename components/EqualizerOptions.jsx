@@ -5,6 +5,7 @@ import { useThemeColor } from '@/hooks/useThemeColor';
 import {Picker} from '@react-native-picker/picker';
 import ManualCompressor from './ManualCompressor';
 import ManualEqualizer from './ManualEqualizer';
+import { EfxControls } from '@/hooks/Context/ProcessedAudio';
 
 const EqualizerOptions = ({vocals, title, name}) => {
 
@@ -13,6 +14,10 @@ const EqualizerOptions = ({vocals, title, name}) => {
     const [selectedPreset, setSelectedPreset] = useState("Default");
     const theme = useThemeColor({light: 'black', dark: 'white'});
     const textColor = useThemeColor({light: 'white', dark: 'black'});
+    const [applyEfx,setApplyEfx] = useState(false);
+    const {appliedEfx, setAppliedEfx} = useContext(EfxControls);
+    const {currentEfx, setCurrentEfx} = useContext(EfxControls);
+
 
     const applyEqualizer = async (filePath, presetName) => {
       try {
@@ -28,8 +33,11 @@ const EqualizerOptions = ({vocals, title, name}) => {
     };
 
     useEffect(() => {
+      if(applyEfx){
         applyEqualizer(vocals, selectedPreset);
-    }, [selectedPreset])
+        setApplyEfx(false);
+      }
+    }, [selectedPreset, applyEfx]);
 
       const preset = [
         {
@@ -77,7 +85,7 @@ const EqualizerOptions = ({vocals, title, name}) => {
     <View style={{width: '100%', height: '100%', flexDirection: 'row', alignItems: 'center', flexWrap: 'wrap', justifyContent: 'space-evenly', gap: 10, paddingHorizontal: 10,}} >
             
               <Text style={{fontSize: 16, fontWeight: 'bold', }} >Presets:- </Text>
-            <Picker style={{height: 30, width: 150}} selectedValue={selectedPreset} onValueChange={(itemValue) => setSelectedPreset(itemValue)} >
+            <Picker style={{height: 30, width: 150}} selectedValue={selectedPreset} onValueChange={(itemValue) => {setSelectedPreset(itemValue); setApplyEfx(true); setCurrentEfx(itemValue); if(currentEfx !== appliedEfx){setAppliedEfx(itemValue)}}} >
               {
               preset && preset.map((p, idx) => (
                 <Picker.Item style={{fontSize: 16, fontWeight: 'bold'}} key={idx} label={p.title} value={p.value} />

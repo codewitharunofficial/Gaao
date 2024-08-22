@@ -5,10 +5,11 @@ const PlayerControls = createContext();
 const PlayerContext = ({children}) => {
 
     const [isPlaying, setIsPlaying] = useState(false);
+    const [trackVolume, setTrackVolume] = useState(1);
 
     return (
 
-    <PlayerControls.Provider value={{isPlaying, setIsPlaying}} >
+    <PlayerControls.Provider value={{isPlaying, setIsPlaying, trackVolume, setTrackVolume}} >
       {children}
     </PlayerControls.Provider>
     )

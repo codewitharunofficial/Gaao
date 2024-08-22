@@ -1,4 +1,5 @@
 import {
+  BackHandler,
   Button,
   Dimensions,
   SafeAreaView,
@@ -25,6 +26,7 @@ import { useThemeColor } from "@/hooks/useThemeColor";
 import ReverbModel from "@/components/Models/ReverbModel";
 import CompressorModal from "@/components/Models/CompressorModel";
 import EqualizerModel from "@/components/Models/EqualizerModel";
+import { PlayerControls } from "@/hooks/Context/Player";
 
 const PreviewScreen = () => {
   const { AudioProcessor } = NativeModules;
@@ -34,81 +36,56 @@ const PreviewScreen = () => {
   const { height } = Dimensions.get("window");
   const theme = useThemeColor({ light: "lightblue", dark: "#000" });
   const modalColor = useThemeColor({ light: "yellow", dark: "lightblue" });
-
-  const [vocalLoaded, setVocalLoaded] = useState(false);
-  const [musicLoaded, setMusicLoaded] = useState(false);
-  const [loadedMusic, setLoadedMusic] = useState();
-  const [loadedVocals, setLoadedVocals] = useState();
-
-  const [reverbPreset, setReverbPreset] = useState("");
   const [applyReverb, setApplyReverb] = useState(false);
   const [applyCompressor, setApplyCompressor] = useState(false);
   const [sync, setSync] = useState(false);
   const [applyEQ, setApplyEQ] = useState(false);
   const { processedVocals, setProcessedVocals } = useContext(RecordedTrack);
+  const { trackVolume, setTrackVolume } = useContext(PlayerControls);
+  const [currentMusic, setCurrentMusic] = useState();
+  const [currentVocals, setCurrentVocals] = useState();
+  const [isProcessing, setIsProcessing] = useState();
 
-  async function loadMusic() {
-    try {
-      if (loadedMusic) {
-        await loadedMusic.stopAsync();
-        loadedMusic.replayAsync();
-      }
-      const { sound, status } = await Audio.Sound.createAsync(
-        { uri: music },
-        { shouldPlay: false }
-      );
-      if (status.isLoaded) {
-        setMusicLoaded(true);
-        setLoadedMusic(sound);
-      }
-    } catch (error) {
-      console.log(error);
-    }
-  }
+  // const playMix = async () => {
+  //   try {
+  //     if (currentMusic && currentVocals) {
+  //       await currentMusic.stopAsync();
+  //       await currentVocals.stopAsync();
+  //       await currentVocals.unloadAsync();
+  //     }
 
-  async function loadProcessedVocals() {
-    try {
-      if (loadedVocals) {
-        await loadedVocals.stopAsync();
-        loadedVocals.unloadAsync();
-      } else {
-        const { sound, status } = await Audio.Sound.createAsync(
-          { uri: processedVocals },
-          {
-            shouldPlay: false,
-          }
-        );
-        if (status.isLoaded) {
-          setVocalLoaded(true);
-          setLoadedVocals(sound);
-          await loadMusic();
-          if (loadedMusic) {
-            await loadedMusic.playAsync();
-            await sound.playAsync();
-          }
-        }
-      }
-    } catch (error) {
-      console.log(error);
-    }
-  }
+  //     if (!currentMusic) {
+  //       const { sound: musicSound, status: musicStatus } =
+  //         await Audio.Sound.createAsync({ uri: music });
+  //       setCurrentMusic(musicSound);
+  //       const { sound: vocalsSound, status: vocalStatus } =
+  //         await Audio.Sound.createAsync({ uri: processedVocals });
+  //       setCurrentVocals(vocalsSound);
+  //     } else {
+  //       const { sound: vocalsSound, status: vocalStatus } =
+  //         await Audio.Sound.createAsync({ uri: processedVocals ? processedVocals : vocals });
+  //         if(vocalStatus.isLoaded){
+  //           setCurrentVocals(vocalsSound && vocalsSound);
 
-  const playMix = async () => {
-    try {
-      await loadMusic();
-      if (loadedMusic) {
-        await loadProcessedVocals();
-      }
-    } catch (error) {
-      console.log(error);
-    }
-  };
+  //         }
+  //     }
+
+  //     if (currentMusic && currentVocals) {
+  //       await Promise.all([
+  //         currentMusic.playAsync(),
+  //         currentVocals.playAsync(),
+  //       ]);
+  //     }
+  //   } catch (error) {
+  //     console.log(error);
+  //   }
+  // };
 
   // useEffect(() => {
-  //   if(processedVocals){
-  //     loadProcessedVocals();
+  //   if (processedVocals) {
+  //     playMix();
   //   }
-  // }, [processedVocals]);
+  // }, [processedVocals, currentMusic]);
 
   const efx = [
     {
@@ -156,7 +133,10 @@ const PreviewScreen = () => {
           }}
         >
           <MusicSlider url={music} title={title} />
-          <VocalSlider url={processedVocals ? processedVocals : vocals} />
+          <VocalSlider
+            url={vocals}
+            title={title}
+          />
         </View>
         <View
           style={{ display: "flex", justifyContent: "flex-end", margin: 0 }}
@@ -181,16 +161,16 @@ const PreviewScreen = () => {
               title={title}
             />
           )}
-          {
-            applyEQ && (
-              <EqualizerModel applyEQ={applyEQ}
+          {applyEQ && (
+            <EqualizerModel
+              applyEQ={applyEQ}
               setApplyEQ={setApplyEQ}
               modalColor={modalColor}
               height={height}
               vocals={vocals}
-              title={title} />
-            )
-          }
+              title={title}
+            />
+          )}
         </View>
         <View
           style={{

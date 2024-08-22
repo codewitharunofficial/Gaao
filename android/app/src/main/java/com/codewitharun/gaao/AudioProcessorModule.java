@@ -9,42 +9,22 @@ import com.facebook.react.bridge.ReactApplicationContext;
 import com.facebook.react.bridge.ReactContextBaseJavaModule;
 import com.facebook.react.bridge.ReactMethod;
 import com.facebook.react.bridge.ReadableMap;
-import android.media.MediaPlayer;
 
 import java.io.File;
 
 public class AudioProcessorModule extends ReactContextBaseJavaModule {
 
     private ReactApplicationContext reactContext;
-    private MediaPlayer mediaPlayer;
 
     public AudioProcessorModule(ReactApplicationContext reactContext) {
         super(reactContext);
         this.reactContext = reactContext;
-        this.mediaPlayer = new MediaPlayer();
+
     }
 
     @Override
     public String getName() {
         return "AudioProcessor";
-    }
-
-    private void stopCurrentAudio() {
-        if (mediaPlayer.isPlaying()) {
-            mediaPlayer.stop();
-            mediaPlayer.reset();
-        }
-    }
-
-    private void playProcessedAudio(String AudioFilePath) {
-        try {
-            stopCurrentAudio();
-            mediaPlayer.setDataSource(AudioFilePath);
-            mediaPlayer.prepare();
-            mediaPlayer.start();
-        } catch (Exception e) {
-            Log.e("AudioProcessor", "Error playing audio", e);
-        }
     }
 
     @ReactMethod
@@ -57,7 +37,7 @@ public class AudioProcessorModule extends ReactContextBaseJavaModule {
 
             FFmpegSession session = FFmpegKit.execute(ffmpegCommand);
             if (session.getReturnCode().isSuccess()) {
-                playProcessedAudio(outputPath);
+
                 promise.resolve(outputPath);
             } else {
                 promise.reject("Error applying reverb preset: " + session.getOutput());
@@ -90,7 +70,7 @@ public class AudioProcessorModule extends ReactContextBaseJavaModule {
             FFmpegSession session = FFmpegKit.execute(ffmpegCommand);
 
             if (ReturnCode.isSuccess(session.getReturnCode())) {
-                playProcessedAudio(outputFilePath);
+
                 promise.resolve(outputFilePath);
             } else {
                 promise.reject("REVERB_ERROR", "Error applying reverb: " + session.getOutput());
@@ -142,7 +122,7 @@ public class AudioProcessorModule extends ReactContextBaseJavaModule {
 
             FFmpegSession session = FFmpegKit.execute(ffmpegCommand);
             if (session.getReturnCode().isSuccess()) {
-                playProcessedAudio(outputPath);
+
                 promise.resolve(outputPath);
             } else {
                 promise.reject("Error applying compressor preset: " + session.getOutput());
@@ -178,7 +158,7 @@ public class AudioProcessorModule extends ReactContextBaseJavaModule {
             FFmpegSession session = FFmpegKit.execute(ffmpegCommand);
 
             if (ReturnCode.isSuccess(session.getReturnCode())) {
-                playProcessedAudio(outputFilePath);
+
                 promise.resolve(outputFilePath);
             } else {
                 promise.reject("COMPRESSOR_ERROR", "Error applying compressor");
@@ -199,7 +179,7 @@ public class AudioProcessorModule extends ReactContextBaseJavaModule {
 
             FFmpegSession session = FFmpegKit.execute(ffmpegCommand);
             if (session.getReturnCode().isSuccess()) {
-                playProcessedAudio(outputPath);
+
                 promise.resolve(outputPath);
             } else {
                 promise.reject("Error applying equalizer preset: " + session.getOutput());
@@ -231,7 +211,7 @@ public class AudioProcessorModule extends ReactContextBaseJavaModule {
             FFmpegSession session = FFmpegKit.execute(ffmpegCommand);
 
             if (ReturnCode.isSuccess(session.getReturnCode())) {
-                playProcessedAudio(outputFilePath);
+
                 promise.resolve(outputFilePath);
             } else {
                 promise.reject("EQUALIZER_ERROR", "Error applying equalizer");
@@ -258,7 +238,7 @@ public class AudioProcessorModule extends ReactContextBaseJavaModule {
             FFmpegSession session = FFmpegKit.execute(ffmpegCommand);
 
             if (ReturnCode.isSuccess(session.getReturnCode())) {
-                playProcessedAudio(outputFilePath);
+
                 promise.resolve(outputFilePath);
             } else {
                 promise.reject("SYNC_ERROR", "Error syncing audio");
@@ -310,15 +290,63 @@ public class AudioProcessorModule extends ReactContextBaseJavaModule {
         }
     }
 
+    @ReactMethod
+    public void mixTracks(String musicFilePath, String vocalFilePath, String outputFilePath, Promise promise) {
+        try {
+            // FFmpeg command to mix audio tracks
+            String ffmpegCommand = String.format(
+                    "-i %s -i %s -filter_complex amix=inputs=2:duration=first:dropout_transition=2 %s",
+                    musicFilePath,
+                    vocalFilePath,
+                    outputFilePath);
+
+            FFmpegSession session = FFmpegKit.execute(ffmpegCommand);
+
+            if (ReturnCode.isSuccess(session.getReturnCode())) {
+                promise.resolve(outputFilePath);
+            } else {
+                promise.reject("MIXING_ERROR", "Error mixing tracks: " + session.getOutput());
+            }
+        } catch (Exception e) {
+            promise.reject("MIXING_ERROR", "Exception during mixing", e);
+        }
+    }
+
+    @ReactMethod
+    public void applyMasteringPreset(String inputFilePath, String outputFilePath, String presetName, Promise promise) {
+        try {
+            String ffmpegCommand = buildMasteringPresetCommand(inputFilePath, outputFilePath, presetName);
+            FFmpegSession session = FFmpegKit.execute(ffmpegCommand);
+            if (ReturnCode.isSuccess(session.getReturnCode())) {
+                promise.resolve(outputFilePath);
+            } else {
+                promise.reject("Error while mastering the track:" + session.getOutput());
+            }
+        } catch (Exception e) {
+            promise.reject("Error applying mastering preset", e);
+        }
+    }
+
+    private String buildMasteringPresetCommand(String inputFilePath, String outputFilePath, String presetName) {
+        // Implement different mastering presets based on the presetName
+        switch (presetName) {
+            case "Bright":
+                return "-i " + inputFilePath + " -af \"treble=g=5\" -y " + outputFilePath;
+            case "Warm":
+                return "-i " + inputFilePath + " -af \"bass=g=5\" -y " + outputFilePath;
+            case "Balanced":
+                return "-i " + inputFilePath
+                        + " -af \"equalizer=f=1000:width_type=h:width=200:g=3,bass=g=3,treble=g=3\" -y "
+                        + outputFilePath;
+            default:
+                return "-i " + inputFilePath + " -y " + outputFilePath; // No processing
+        }
+    }
+
     private String getCacheFilePath(String fileName) {
         File cacheDir = reactContext.getCacheDir();
         File file = new File(cacheDir, fileName);
         return file.getAbsolutePath();
     }
 
-    @ReactMethod
-    public void stopAudio(Promise promise) {
-        stopCurrentAudio();
-        promise.resolve("Audio Has Been Stop.");
-    }
 }

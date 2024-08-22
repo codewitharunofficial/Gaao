@@ -11,10 +11,11 @@ const ReverbOptions = ({vocals, title, name}) => {
 
     const {AudioProcessor} = NativeModules;
     const {processedVocals, setProcessedVocals} = useContext(RecordedTrack);
-    const [manual, setManual] = useState(false);
     const [selectedPreset, setSelectedPreset] = useState("Default");
     const theme = useThemeColor({light: 'black', dark: 'white'});
     const textColor = useThemeColor({light: 'white', dark: 'black'});
+    const [applyEfx,setApplyEfx] = useState(false);
+
 
     const applyReverb = async (filePath, presetName) => {
       console.log(presetName);
@@ -31,8 +32,11 @@ const ReverbOptions = ({vocals, title, name}) => {
     };
 
     useEffect(() => {
-        applyReverb(vocals, selectedPreset);
-    }, [selectedPreset])
+        if(applyEfx){
+          applyReverb(vocals, selectedPreset);
+          setApplyEfx(false);
+        }
+    }, [selectedPreset, applyEfx])
 
       const preset = [
         {
@@ -100,7 +104,7 @@ const ReverbOptions = ({vocals, title, name}) => {
     <View style={{width: '100%', height: '100%', flexDirection: 'row', alignItems: 'center', flexWrap: 'wrap', justifyContent: 'space-evenly', gap: 10, paddingHorizontal: 10,}} >
             
               <Text style={{fontSize: 16, fontWeight: 'bold'}} >Presets:-</Text>
-            <Picker style={{height: 30, width: 150}} selectedValue={selectedPreset} onValueChange={(itemValue) => setSelectedPreset(itemValue)} >
+            <Picker style={{height: 30, width: 150}} selectedValue={selectedPreset} onValueChange={(itemValue) => {setSelectedPreset(itemValue); setApplyEfx(true)}} >
               {
               preset && preset.map((p, idx) => (
                 <Picker.Item key={idx} label={p.title} value={p.value} />

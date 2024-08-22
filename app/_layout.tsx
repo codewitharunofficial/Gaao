@@ -13,6 +13,8 @@ import { useColorScheme } from "@/hooks/useColorScheme";
 import { KaraokeContext } from "@/hooks/Context/Karaoke";
 import { RecordingContext } from "@/hooks/Context/Recording";
 import { VisualizerContext } from "@/hooks/Context/WaveForm";
+import { PlayerContext } from "@/hooks/Context/Player";
+import { EfxContext } from "@/hooks/Context/ProcessedAudio";
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
 
@@ -35,6 +37,8 @@ export default function RootLayout() {
   return (
     <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
       <VisualizerContext>
+        <EfxContext>
+        <PlayerContext>
         <KaraokeContext>
           <RecordingContext>
             <Stack>
@@ -45,6 +49,8 @@ export default function RootLayout() {
             <ModalPortal />
           </RecordingContext>
         </KaraokeContext>
+        </PlayerContext>
+        </EfxContext>
       </VisualizerContext>
     </ThemeProvider>
   );

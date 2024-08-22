@@ -16,7 +16,7 @@ export default function HomeScreen() {
     try {
     //   const response = await fetch('http://192.168.43.224:6969/api/v1/karaoke/get-tracks');
     // console.log(response);
-    const {data} = await axios.get('http://192.168.83.47:6969/api/v1/karaoke/get-tracks');
+    const {data} = await axios.get(`http://192.168.83.47:6969/api/v1/karaoke/get-tracks`);
     if(data && data?.success){
       setTracks(data.tracks);
     }
