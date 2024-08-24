@@ -4,6 +4,7 @@ import { RecordedTrack } from '../hooks/Context/Recording';
 import { useThemeColor } from '@/hooks/useThemeColor';
 import {Picker} from '@react-native-picker/picker';
 import ManualCompressor from './ManualCompressor';
+import { EfxControls } from '@/hooks/Context/ProcessedAudio';
 
 const CompressorOptions = ({vocals, title, name}) => {
 
@@ -13,6 +14,8 @@ const CompressorOptions = ({vocals, title, name}) => {
     const theme = useThemeColor({light: 'black', dark: 'white'});
     const textColor = useThemeColor({light: 'white', dark: 'black'});
     const [applyEfx,setApplyEfx] = useState(false);
+    const {appliedEfx, setAppliedEfx} = useContext(EfxControls);
+    const {currentEfx, setCurrentEfx} = useContext(EfxControls);
 
     const applyCompressor = async (filePath, presetName) => {
       try {
@@ -80,7 +83,7 @@ const CompressorOptions = ({vocals, title, name}) => {
     <View style={{width: '100%', height: '100%', flexDirection: 'row', alignItems: 'center', flexWrap: 'wrap', justifyContent: 'space-evenly', gap: 10, paddingHorizontal: 10,}} >
             
               <Text style={{fontSize: 16, fontWeight: 'bold', }} >Presets:- </Text>
-            <Picker style={{height: 30, width: 150}} selectedValue={selectedPreset} onValueChange={(itemValue) => {setSelectedPreset(itemValue); setApplyEfx(true)}} >
+            <Picker style={{height: 30, width: 150}} selectedValue={selectedPreset} onValueChange={(itemValue) => {setSelectedPreset(itemValue); setApplyEfx(true); setCurrentEfx(itemValue); if(currentEfx !== appliedEfx){setAppliedEfx(itemValue)}}} >
               {
               preset && preset.map((p, idx) => (
                 <Picker.Item key={idx} label={p.title} value={p.value} />

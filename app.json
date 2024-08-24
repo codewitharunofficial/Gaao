@@ -45,7 +45,8 @@
       },
       "eas": {
         "projectId": "a474f8a6-a1e2-4e4a-a978-67ff2d82879a"
-      }
+      },
+      "googleClientId": "632816505768-19ut7in277tncklho1fonidsa6uve3mq.apps.googleusercontent.com"
     },
     "runtimeVersion": "1.0.2",
     "updates": {

@@ -21,34 +21,36 @@ const MusicSlider = ({ title, url }) => {
   const [sound, setSound] = useState();
   const { setMusicWave } = useContext(Visualizer);
   const { processedVocals, setProcessedVocals } = useContext(RecordedTrack);
-  const {appliedEfx, currentEfx} = useContext(EfxControls);
+  const { appliedEfx, currentEfx } = useContext(EfxControls);
 
   const playMusic = async () => {
     try {
-      if(sound){
+      if (sound) {
         await sound.stopAsync();
-      }
-      const { sound, status } = await Audio.Sound.createAsync({ uri: url });
-      await sound.playAsync();
-      setIsMusicPlaying(true);
-      setSound(sound);
+        setIsMusicPlaying(false);
+      } else {
+        const { sound, status } = await Audio.Sound.createAsync({ uri: url });
+        await sound.playAsync();
+        setIsMusicPlaying(true);
+        setSound(sound);
 
-      async function unload(status) {
-        try {
-          if (status.didJustFinish) {
-            await sound.unloadAsync();
-            setIsMusicPlaying(false);
+        async function unload(status) {
+          try {
+            if (status.didJustFinish) {
+              await sound.unloadAsync();
+              setIsMusicPlaying(false);
+            }
+          } catch (error) {
+            console.log(error);
           }
-        } catch (error) {
-          console.log(error);
         }
-      }
 
-      sound.setOnPlaybackStatusUpdate((status) => {
-        if (status.didJustFinish) {
-          unload(status);
-        }
-      });
+        sound.setOnPlaybackStatusUpdate((status) => {
+          if (status.didJustFinish) {
+            unload(status);
+          }
+        });
+      }
     } catch (error) {
       console.log(error);
     }
@@ -66,18 +68,20 @@ const MusicSlider = ({ title, url }) => {
 
   async function handleVolume(volume) {
     try {
-      await currentSound.setVolumeAsync(volume);
+      // await currentSound.setVolumeAsync(volume);
       await sound.setVolumeAsync(volume);
     } catch (error) {
       console.log(error);
     }
   }
 
+  console.log(appliedEfx, currentEfx);
+
   useEffect(() => {
-    if(processedVocals && appliedEfx !== currentEfx){
+    if (processedVocals && appliedEfx !== currentEfx) {
       playMusic();
     }
-  }, [processedVocals]);
+  }, [currentEfx, processedVocals]);
 
   return (
     <View

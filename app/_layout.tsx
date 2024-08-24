@@ -15,6 +15,7 @@ import { RecordingContext } from "@/hooks/Context/Recording";
 import { VisualizerContext } from "@/hooks/Context/WaveForm";
 import { PlayerContext } from "@/hooks/Context/Player";
 import { EfxContext } from "@/hooks/Context/ProcessedAudio";
+import { UserContext } from "@/hooks/Context/User";
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
 
@@ -36,6 +37,7 @@ export default function RootLayout() {
 
   return (
     <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
+      <UserContext>
       <VisualizerContext>
         <EfxContext>
         <PlayerContext>
@@ -44,7 +46,6 @@ export default function RootLayout() {
             <Stack>
               <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
               <Stack.Screen name="screens" options={{ headerShown: false }} />
-              <Stack.Screen name="+not-found" />
             </Stack>
             <ModalPortal />
           </RecordingContext>
@@ -52,6 +53,7 @@ export default function RootLayout() {
         </PlayerContext>
         </EfxContext>
       </VisualizerContext>
+      </UserContext>
     </ThemeProvider>
   );
 }

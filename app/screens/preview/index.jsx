@@ -27,6 +27,7 @@ import ReverbModel from "@/components/Models/ReverbModel";
 import CompressorModal from "@/components/Models/CompressorModel";
 import EqualizerModel from "@/components/Models/EqualizerModel";
 import { PlayerControls } from "@/hooks/Context/Player";
+import { EfxControls } from "@/hooks/Context/ProcessedAudio";
 
 const PreviewScreen = () => {
   const { AudioProcessor } = NativeModules;
@@ -44,7 +45,8 @@ const PreviewScreen = () => {
   const { trackVolume, setTrackVolume } = useContext(PlayerControls);
   const [currentMusic, setCurrentMusic] = useState();
   const [currentVocals, setCurrentVocals] = useState();
-  const [isProcessing, setIsProcessing] = useState();
+  const {isProcessing, setIsProcessing} = useContext(EfxControls);
+  const {efxList, setEfxList} = useContext(EfxControls);
 
   // const playMix = async () => {
   //   try {
@@ -147,7 +149,7 @@ const PreviewScreen = () => {
               setApplyReverb={setApplyReverb}
               modalColor={modalColor}
               height={height}
-              vocals={vocals}
+              vocals={isProcessing && processedVocals ? processedVocals : vocals}
               title={title}
             />
           )}
@@ -157,7 +159,7 @@ const PreviewScreen = () => {
               setApplyCompressor={setApplyCompressor}
               modalColor={modalColor}
               height={height}
-              vocals={vocals}
+              vocals={isProcessing && processedVocals ? processedVocals : vocals}
               title={title}
             />
           )}
@@ -167,11 +169,12 @@ const PreviewScreen = () => {
               setApplyEQ={setApplyEQ}
               modalColor={modalColor}
               height={height}
-              vocals={vocals}
+              vocals={isProcessing && processedVocals ? processedVocals : vocals}
               title={title}
             />
           )}
         </View>
+        <Button title="Discard Changes" onPress={() => {setEfxList([]); setIsProcessing(false)}} color={'red'} />
         <View
           style={{
             width: "100%",

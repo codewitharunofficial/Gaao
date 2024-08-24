@@ -30,7 +30,7 @@ import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import * as FileSystem from "expo-file-system";
 import * as MediaLibrary from "expo-media-library";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import {useThemeColor} from '@/hooks/useThemeColor';
+import { useThemeColor } from "@/hooks/useThemeColor";
 
 export default function Record() {
   const { title, lyrics, artists, url, coverPhoto } = useLocalSearchParams();
@@ -47,8 +47,9 @@ export default function Record() {
   const { vocals, setVocals } = useContext(RecordedTrack);
   const [finished, setFinished] = useState(false);
   const { processedVocals, setProcessedVocals } = useContext(RecordedTrack);
+  const [isLoaded, setIsLoaded] = useState(false);
 
-  const theme = useThemeColor({light: 'black', dark: 'white'});
+  const theme = useThemeColor({ light: "black", dark: "white" });
 
   const checkIfAvailable = async () => {
     try {
@@ -94,6 +95,7 @@ export default function Record() {
         setCurrentSound(sound);
       }
       console.log("Song Loaded Successfully");
+      setIsLoaded(true);
     } catch (error) {
       console.log(error);
     }
@@ -219,7 +221,6 @@ export default function Record() {
     }
   };
 
-
   useEffect(() => {
     setProcessedVocals(null);
   }, []);
@@ -306,28 +307,31 @@ export default function Record() {
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
-                borderRightWidth: StyleSheet.hairlineWidth,
-                borderRightColor: "black",
               }}
             >
               <Ionicons name="pause" size={40} color={theme} />
               <Text style={{ color: theme }}>Pause</Text>
             </TouchableOpacity>
-          ) : finished ? (<TouchableOpacity
-            onPress={ async () => {await currentSound.setPositionAsync(0); await recordedTrack.stopAndUnloadAsync(); setFinished(false)}}
-            style={{
-              width: "30%",
-              height: "100%",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              borderRightWidth: StyleSheet.hairlineWidth,
-              borderRightColor: "black",
-            }}
-          >
-            <Ionicons name="reload-circle-outline" size={40} color={theme} />
-            <Text style={{ color: "white" }}>Reset?</Text>
-          </TouchableOpacity>) : (
+          ) : finished ? (
+            <TouchableOpacity
+              onPress={async () => {
+                setFinished(false);
+                await currentSound.stopAsync();
+                await recordedTrack.stopAndUnloadAsync();
+                setRecordedTrack();
+              }}
+              style={{
+                width: "30%",
+                height: "100%",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
+              <Ionicons name="reload-circle-outline" size={40} color={theme} />
+              <Text style={{ color: theme }}>Reset?</Text>
+            </TouchableOpacity>
+          ) : (
             <TouchableOpacity
               onPress={() => {
                 pause ? resumeTrack() : autoPlayTrack();
@@ -345,6 +349,7 @@ export default function Record() {
             </TouchableOpacity>
           )}
           <TouchableOpacity
+            disabled={isLoaded ? false : true}
             onPress={() => {
               isRecording ? stopSinging() : singAlong();
             }}

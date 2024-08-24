@@ -1,13 +1,17 @@
 import { Image, StyleSheet, Platform, Button, TouchableOpacity, ScrollView, SafeAreaView, View } from 'react-native';
 import WelcomeScreen from '@/components/Welcome';
 import ParallaxScrollView from '@/components/ParallaxScrollView';
-import { useEffect, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import { ThemedView } from '@/components/ThemedView';
 import ShortcutStrips from '@/components/ShortcutStrips';
 import axios from 'axios'
 import TrackCard from '@/components/TrackCard';
+import { Auth } from '@/hooks/Context/User';
+
 
 export default function HomeScreen() {
+
+  const {user} = useContext(Auth);
 
   const [userType, setUserType] = useState("Old");
   const [tracks, setTracks] = useState([]);

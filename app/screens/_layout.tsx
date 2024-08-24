@@ -19,6 +19,8 @@ export default function RootLayout() {
       <Stack>
         <Stack.Screen name="index" options={{presentation: "fullScreenModal", title: "Record", animation: 'slide_from_bottom', headerBackVisible: false}} />
         <Stack.Screen name="preview" options={{headerShown: false}} />
+        <Stack.Screen name="Auth" options={{headerShown: false}} />
+        
       </Stack>
     </ThemeProvider>
   );

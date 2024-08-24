@@ -66,7 +66,7 @@ useEffect(() => {
   if(processedVocals && appliedEfx !== currentEfx){
     playVocals();
   }
-}, [processedVocals]);
+}, [processedVocals, currentEfx]);
 
   return (
     <View style={{flex: 0.5, width: '90%', borderRadius: 10, padding: 10, flexDirection: 'column', gap: 10 }} >
