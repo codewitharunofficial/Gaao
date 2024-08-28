@@ -30,13 +30,14 @@ const index = () => {
 
   setNavigation(router);
 
-  const navigation = useNavigation();
+  // const navigation = useNavigation();
 
-  const androidClientId =
-    "632816505768-19ut7in277tncklho1fonidsa6uve3mq.apps.googleusercontent.com";
+  const androidClientId = "632816505768-19ut7in277tncklho1fonidsa6uve3mq.apps.googleusercontent.com"
+
+  // console.log(androidClientId);
 
   const config = {
-    androidClientId,
+    androidClientId: androidClientId
   };
 
   const [request, response, promptAsync] = Google.useAuthRequest(config);
@@ -87,13 +88,13 @@ const index = () => {
   const signUp = async (userData) => {
       try {
         const { data } = await axios.post(
-          "http://192.168.83.47:6969/api/v1/users/registration",
+          `${process.env.EXPO_PUBLIC_URL}/api/v1/users/registration`,
           userData
         );
         if (data.success) {
           setUser(data);
         }
-        router.push("/(tabs)");
+        router.replace("/(tabs)");
         await AsyncStorage.setItem("user", JSON.stringify(data));
         setIsSigningUp(false);
       } catch (error) {
@@ -104,12 +105,12 @@ const index = () => {
   const logIn = async (email) => {
           
     try {
-      const {data} = await axios.post('http://192.168.83.47:6969/api/v1/users/login', {email: email});
+      const {data} = await axios.post(`${process.env.EXPO_PUBLIC_URL}/api/v1/users/login`, {email: email});
 
       if(data && data.success){
          setUser(data);
          await AsyncStorage.setItem("user", JSON.stringify(data));
-         router.push("/(tabs)");
+         router.replace("/(tabs)");
          setLogginIn(false);
       }
     } catch (error) {
@@ -177,8 +178,7 @@ useEffect(() => {
           const data = JSON.parse(res);
           if (data) {
             setUser(data);
-            console.log(data);
-            router.push("/(tabs)");
+            // router.replace("/(tabs)");
             return true;
           } else {
             return false;

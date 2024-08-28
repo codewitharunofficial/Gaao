@@ -5,12 +5,20 @@
   "build": {
     "development": {
       "developmentClient": true,
-      "channel": "client"
+      "channel": "client",
+      "env": {
+        "EXPO_PUBLIC_URL": "http://192.168.226.47:6969",
+        "EXPO_APP_SECRET": "632816505768-19ut7in277tncklho1fonidsa6uve3mq.apps.googleusercontent.com"
+      }
     },
     "preview": {
       "android": {
         "buildType": "apk",
-        "channel": "preview"
+        "channel": "preview",
+        "env": {
+          "EXPO_PUBLIC_URL": "https://app-gaao.onrender.com",
+          "EXPO_APP_SECRET": "632816505768-19ut7in277tncklho1fonidsa6uve3mq.apps.googleusercontent.com"
+        }
       },
       "channel": "preview"
     },

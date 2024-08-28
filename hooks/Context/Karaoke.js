@@ -4,12 +4,13 @@ const TrackControls = createContext();
 
 const KaraokeContext = ({children}) => {
 
-    const [currentSound, setCurrentSound] = useState({});
+    const [currentSound, setCurrentSound] = useState(null);
+    const [currentVocals, setCurrentVocals] = useState(null);
     const [position, setPosition] = useState(0);
 
     return (
 
-    <TrackControls.Provider value={{currentSound, setCurrentSound, position, setPosition}} >
+    <TrackControls.Provider value={{currentSound, setCurrentSound, position, setPosition, currentVocals, setCurrentVocals}} >
       {children}
     </TrackControls.Provider>
     )

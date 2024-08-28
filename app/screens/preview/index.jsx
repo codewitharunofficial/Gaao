@@ -8,7 +8,7 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import React, { useContext, useEffect, useState } from "react";
+import React, { useContext, useEffect, useRef, useState } from "react";
 import { Link, useLocalSearchParams } from "expo-router";
 import { ThemedView } from "@/components/ThemedView";
 import { ThemedText } from "@/components/ThemedText";
@@ -28,6 +28,8 @@ import CompressorModal from "@/components/Models/CompressorModel";
 import EqualizerModel from "@/components/Models/EqualizerModel";
 import { PlayerControls } from "@/hooks/Context/Player";
 import { EfxControls } from "@/hooks/Context/ProcessedAudio";
+import SyncModal from "@/components/Models/SyncModal";
+import { TrackControls } from "@/hooks/Context/Karaoke";
 
 const PreviewScreen = () => {
   const { AudioProcessor } = NativeModules;
@@ -43,51 +45,109 @@ const PreviewScreen = () => {
   const [applyEQ, setApplyEQ] = useState(false);
   const { processedVocals, setProcessedVocals } = useContext(RecordedTrack);
   const { trackVolume, setTrackVolume } = useContext(PlayerControls);
-  const [currentMusic, setCurrentMusic] = useState();
-  const [currentVocals, setCurrentVocals] = useState();
-  const {isProcessing, setIsProcessing} = useContext(EfxControls);
-  const {efxList, setEfxList} = useContext(EfxControls);
+  const { currentSound, setCurrentSound } = useContext(TrackControls);
+  const { currentVocals, setCurrentVocals } = useContext(TrackControls);
+  const { isProcessing, setIsProcessing } = useContext(EfxControls);
+  const { efxList, setEfxList } = useContext(EfxControls);
+  const { appliedEfx, currentEfx } = useContext(EfxControls);
+  const [isMusicPlaying, setIsMusicPlaying] = useState(false);
+  const [isVocalPlaying, setIsVocalPlaying] = useState(false);
+  const [vocalsVolume, setVocalsVolume] = useState(1.0);
+  const isMounted = useRef(true);
 
-  // const playMix = async () => {
-  //   try {
-  //     if (currentMusic && currentVocals) {
-  //       await currentMusic.stopAsync();
-  //       await currentVocals.stopAsync();
-  //       await currentVocals.unloadAsync();
-  //     }
+  useEffect(() => {
+    if (!currentSound && !currentVocals)
+      return () => {
+        isMounted.current = false;
+        stopPlayback();
+      };
+  }, [currentSound]);
 
-  //     if (!currentMusic) {
-  //       const { sound: musicSound, status: musicStatus } =
-  //         await Audio.Sound.createAsync({ uri: music });
-  //       setCurrentMusic(musicSound);
-  //       const { sound: vocalsSound, status: vocalStatus } =
-  //         await Audio.Sound.createAsync({ uri: processedVocals });
-  //       setCurrentVocals(vocalsSound);
-  //     } else {
-  //       const { sound: vocalsSound, status: vocalStatus } =
-  //         await Audio.Sound.createAsync({ uri: processedVocals ? processedVocals : vocals });
-  //         if(vocalStatus.isLoaded){
-  //           setCurrentVocals(vocalsSound && vocalsSound);
+  const loadAndPlaySound = async (sound, filePath, volume) => {
+    try {
+      if (sound) {
+        await sound.unloadAsync();
+      }
 
-  //         }
-  //     }
+      const { sound: newSound, status } = await Audio.Sound.createAsync(
+        { uri: filePath },
+        { shouldPlay: true, volume: volume }
+      );
+      if (newSound && status.isLoaded) {
+        return newSound;
+      } else {
+        console.log(`Failed to load sound`);
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
 
-  //     if (currentMusic && currentVocals) {
-  //       await Promise.all([
-  //         currentMusic.playAsync(),
-  //         currentVocals.playAsync(),
-  //       ]);
-  //     }
-  //   } catch (error) {
-  //     console.log(error);
-  //   }
-  // };
+  const stopPlayback = async () => {
+    try {
+      if (currentSound) {
+        await currentSound.stopAsync();
+        await currentSound.unloadAsync();
+      }
+      if (currentVocals) {
+        await currentVocals.stopAsync();
+        await currentVocals.unloadAsync();
+      }
 
-  // useEffect(() => {
-  //   if (processedVocals) {
-  //     playMix();
-  //   }
-  // }, [processedVocals, currentMusic]);
+      setCurrentSound(null);
+      setCurrentVocals(null);
+    } catch (error) {
+      console.log(`Error Stoping Tracks:`, error);
+    }
+  };
+
+  async function loadMusic() {
+    try {
+      const musicSound = await loadAndPlaySound(
+        currentSound,
+        music,
+        trackVolume
+      );
+      if (musicSound) {
+        console.log(musicSound);
+        setIsMusicPlaying(true);
+        // setCurrentSound(musicSound);
+      } else {
+        console.log(`Error loading music`);
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
+  async function loadVocals() {
+    try {
+      const vocalSound = await loadAndPlaySound(
+        currentVocals,
+        processedVocals ? processedVocals : vocals,
+        vocalsVolume
+      );
+      if (vocalSound) {
+        console.log(vocalSound);
+        setIsVocalPlaying(true);
+        // setCurrentVocals(vocalSound);
+      } else {
+        console.log(`Error loading vocals`);
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
+  useEffect(() => {
+    if (vocals || processedVocals) {
+      loadVocals();
+    }
+  }, [processedVocals]);
+
+  useEffect(() => {
+    loadMusic();
+  }, [processedVocals]);
 
   const efx = [
     {
@@ -112,6 +172,26 @@ const PreviewScreen = () => {
     },
   ];
 
+  const handleMix = async () => {
+    try {
+      const result = await AudioProcessor.mixMusicAndVocals(
+        music,
+        processedVocals,
+        1,
+        0.5
+      );
+      if (result) {
+        console.log(result);
+        const { musicSound: sound } = Audio.Sound.createAsync(
+          { uri: result },
+          { shouldPlay: true }
+        );
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
   return (
     <SafeAreaView style={{ width: "100%", height: "100%" }}>
       <ThemedView
@@ -134,9 +214,18 @@ const PreviewScreen = () => {
             padding: 10,
           }}
         >
-          <MusicSlider url={music} title={title} />
+          <MusicSlider
+            url={music}
+            title={title}
+            isMusicPlaying={isMusicPlaying}
+            setIsMusicPlaying={setIsMusicPlaying}
+          />
           <VocalSlider
-            url={vocals}
+            isVocalPlaying={isVocalPlaying}
+            setIsVocalPlaying={setIsVocalPlaying}
+            vocalsVolume={vocalsVolume}
+            setVocalsVolume={setVocalsVolume}
+            url={processedVocals ? processedVocals : vocals}
             title={title}
           />
         </View>
@@ -149,7 +238,9 @@ const PreviewScreen = () => {
               setApplyReverb={setApplyReverb}
               modalColor={modalColor}
               height={height}
-              vocals={isProcessing && processedVocals ? processedVocals : vocals}
+              vocals={
+                isProcessing && processedVocals ? processedVocals : vocals
+              }
               title={title}
             />
           )}
@@ -159,7 +250,9 @@ const PreviewScreen = () => {
               setApplyCompressor={setApplyCompressor}
               modalColor={modalColor}
               height={height}
-              vocals={isProcessing && processedVocals ? processedVocals : vocals}
+              vocals={
+                isProcessing && processedVocals ? processedVocals : vocals
+              }
               title={title}
             />
           )}
@@ -169,12 +262,34 @@ const PreviewScreen = () => {
               setApplyEQ={setApplyEQ}
               modalColor={modalColor}
               height={height}
-              vocals={isProcessing && processedVocals ? processedVocals : vocals}
+              vocals={
+                isProcessing && processedVocals ? processedVocals : vocals
+              }
+              title={title}
+            />
+          )}
+          {sync && (
+            <SyncModal
+              applySync={sync}
+              setApplySync={setSync}
+              modalColor={modalColor}
+              height={height}
+              vocals={
+                isProcessing && processedVocals ? processedVocals : vocals
+              }
               title={title}
             />
           )}
         </View>
-        <Button title="Discard Changes" onPress={() => {setEfxList([]); setIsProcessing(false)}} color={'red'} />
+        <Button
+          title="Discard Changes"
+          onPress={() => {
+            setEfxList([]);
+            setIsProcessing(false);
+            setProcessedVocals(vocals);
+          }}
+          color={"red"}
+        />
         <View
           style={{
             width: "100%",
@@ -207,6 +322,7 @@ const PreviewScreen = () => {
                 <ThemedText>{e.title}</ThemedText>
               </TouchableOpacity>
             ))}
+          <Button title="Mix" onPress={() => handleMix()} color={"lightblue"} />
         </View>
       </ThemedView>
     </SafeAreaView>

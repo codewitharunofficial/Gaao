@@ -159,8 +159,11 @@ const ReverbOptions = ({ vocals, title, name }) => {
           vocals={vocals}
           title={name}
         />
+     <TouchableOpacity onPress={() => {efxList.push(efx); setApplyEfx(false); setIsProcessing(true)}} style={{width: '20%', height: '10%', backgroundColor: 'green', position: 'absolute', bottom: 10, right: 5}} >
+         <Text style={{fontSize: 12, fontWeight: 'bold', color: 'black'}} >Apply-Changes</Text>
+     </TouchableOpacity>
       </View>
-      <Button title="Apply Changes" onPress={() => {efxList.push(efx); setApplyEfx(false); setIsProcessing(true)}} color={buttonColor} />
+
     </View>
   );
 };

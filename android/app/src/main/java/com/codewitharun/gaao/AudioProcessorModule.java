@@ -223,28 +223,35 @@ public class AudioProcessorModule extends ReactContextBaseJavaModule {
 
     // Manual Sync Method
     @ReactMethod
-    public void syncAudio(String inputFilePath, String referenceFilePath, String outputFilePath, double delayInSeconds,
-            Promise promise) {
+    public void applyDelay(String filePath, String outputPath, double delaySeconds, Promise promise) {
         try {
-            String ffmpegCommand = String.format(
-                    "-i %s -itsoffset %.2f -i %s -map 1:a -map 0:a -c copy %s",
-                    inputFilePath,
-                    delayInSeconds,
-                    referenceFilePath,
-                    outputFilePath);
-
-            Log.i("FFmpeg Command", ffmpegCommand); // Log the FFmpeg command
+            String ffmpegCommand;
+            if (delaySeconds < 0) {
+                // Negative delay: trim the start of the audio
+                ffmpegCommand = String.format(
+                        "-i %s -ss %s -c copy %s",
+                        filePath,
+                        String.valueOf(-delaySeconds), // Convert double to string
+                        outputPath);
+            } else {
+                // Positive delay: add silence or shift audio forward
+                ffmpegCommand = String.format(
+                        "-i %s -af \"adelay=%s|%s\" %s",
+                        filePath,
+                        String.valueOf((int) (delaySeconds * 1000)), // Convert to milliseconds and then to string
+                        String.valueOf((int) (delaySeconds * 1000)), // Same delay for all channels
+                        outputPath);
+            }
 
             FFmpegSession session = FFmpegKit.execute(ffmpegCommand);
 
             if (ReturnCode.isSuccess(session.getReturnCode())) {
-
-                promise.resolve(outputFilePath);
+                promise.resolve(outputPath);
             } else {
-                promise.reject("SYNC_ERROR", "Error syncing audio");
+                promise.reject("DELAY_ERROR", "Error applying delay");
             }
         } catch (Exception e) {
-            promise.reject("SYNC_ERROR", "Exception during audio sync", e);
+            promise.reject("DELAY_ERROR", "Exception during delay processing", e);
         }
     }
 
@@ -291,26 +298,33 @@ public class AudioProcessorModule extends ReactContextBaseJavaModule {
     }
 
     @ReactMethod
-    public void mixTracks(String musicFilePath, String vocalFilePath, String outputFilePath, Promise promise) {
-        try {
-            // FFmpeg command to mix audio tracks
-            String ffmpegCommand = String.format(
-                    "-i %s -i %s -filter_complex amix=inputs=2:duration=first:dropout_transition=2 %s",
-                    musicFilePath,
-                    vocalFilePath,
-                    outputFilePath);
+    public void mixMusicAndVocals(String musicFilePath, String vocalFilePath, double musicVolume, double vocalVolume, 
+            double vocalDelay, Promise promise) {
+    try {
+        String outputPath = getCacheFilePath("mixed_output_" + System.currentTimeMillis() + ".wav");
 
-            FFmpegSession session = FFmpegKit.execute(ffmpegCommand);
+        String ffmpegCommand = String.format(
+                "-i %s -i %s -filter_complex \"[1:a]adelay=%d|%d,volume=%.2f[a1];[0:a]volume=%.2f[a0];[a0][a1]amix=inputs=2:duration=longest:dropout_transition=2\" -c:a libmp3lame -q:a 4 %s",
+                musicFilePath,
+                vocalFilePath,
+                (int) (vocalDelay * 1000),
+                (int) (vocalDelay * 1000),
+                vocalVolume,
+                musicVolume,
+                outputPath);
 
-            if (ReturnCode.isSuccess(session.getReturnCode())) {
-                promise.resolve(outputFilePath);
-            } else {
-                promise.reject("MIXING_ERROR", "Error mixing tracks: " + session.getOutput());
-            }
-        } catch (Exception e) {
-            promise.reject("MIXING_ERROR", "Exception during mixing", e);
+        FFmpegSession session = FFmpegKit.execute(ffmpegCommand);
+
+        if (ReturnCode.isSuccess(session.getReturnCode())) {
+            promise.resolve(outputPath);
+        } else {
+            promise.reject("MIXING_ERROR", "Error mixing music and vocals: " + session.getOutput());
         }
+    } catch (Exception e) {
+        promise.reject("MIXING_ERROR", "Exception during mixing", e);
     }
+}
+
 
     @ReactMethod
     public void applyMasteringPreset(String inputFilePath, String outputFilePath, String presetName, Promise promise) {
@@ -324,6 +338,25 @@ public class AudioProcessorModule extends ReactContextBaseJavaModule {
             }
         } catch (Exception e) {
             promise.reject("Error applying mastering preset", e);
+        }
+    }
+
+
+    @ReactMethod
+    public void trimAudio(String inputFilePath, String outputFilePath, int startMs, int endMs, Promise promise) {
+        try {
+            String cmd = String.format("-i %s -ss %d -to %d -c copy %s", inputFilePath, startMs / 1000, endMs / 1000, outputFilePath);
+        
+        FFmpegSession session = FFmpegKit.execute(cmd);
+    
+        if (ReturnCode.isSuccess(session.getReturnCode())) {
+            promise.resolve(outputFilePath);
+        } else {
+            
+            promise.reject("FFmpeg Error", "Trimming failed: " + session.getOutput());
+        }
+        } catch (Exception e) {
+            promise.reject("Error While Trimming Audio:", e);
         }
     }
 

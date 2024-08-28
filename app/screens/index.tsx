@@ -31,6 +31,8 @@ import * as FileSystem from "expo-file-system";
 import * as MediaLibrary from "expo-media-library";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useThemeColor } from "@/hooks/useThemeColor";
+import { NativeModules } from "react-native";
+import LoadingScreen from "@/components/LoadingScreen";
 
 export default function Record() {
   const { title, lyrics, artists, url, coverPhoto } = useLocalSearchParams();
@@ -41,6 +43,8 @@ export default function Record() {
   const [playing, setPlaying] = useState(false);
   const [pause, setPause] = useState(false);
   const { currentSound, setCurrentSound } = useContext(TrackControls);
+  const [startPosition, setStartPosition] = useState(0);
+  const [endPosition, setEndPosition] = useState(0);
   const { position, setPosition } = useContext(TrackControls);
   const { recordedTrack, setRecordedTrack } = useContext(RecordedTrack);
   const [isRecording, setIsRecording] = useState(false);
@@ -48,6 +52,9 @@ export default function Record() {
   const [finished, setFinished] = useState(false);
   const { processedVocals, setProcessedVocals } = useContext(RecordedTrack);
   const [isLoaded, setIsLoaded] = useState(false);
+  const [recordedMusic, setRecordedMusic] = useState();
+  const {AudioProcessor} = NativeModules;
+  const [loading, setLoading] = useState(false);
 
   const theme = useThemeColor({ light: "black", dark: "white" });
 
@@ -72,7 +79,7 @@ export default function Record() {
       const isAvailable = await checkIfAvailable();
       console.log(isAvailable);
       if (!isAvailable) {
-        const fileUri = `${FileSystem.cacheDirectory}${title}.mp3`;
+        const fileUri = `${FileSystem.documentDirectory}${title}.mp3`;
         const { uri } = await FileSystem.downloadAsync(url, fileUri);
         console.log("Audio File Saved To:", uri);
         await AsyncStorage.setItem(`${title}`, JSON.stringify(uri));
@@ -118,6 +125,7 @@ export default function Record() {
         if (status.isLoaded && status.isPlaying) {
           setPlaying(true);
           setPosition(status.positionMillis);
+          setEndPosition(status.positionMillis);
         } else if (status.isLoaded && status.didJustFinish) {
           currentSound.unloadAsync();
           setPlaying(false);
@@ -149,6 +157,7 @@ export default function Record() {
     try {
       console.log(position);
       await currentSound.playFromPositionAsync(position);
+      setStartPosition(position);
     } catch (error) {
       console.log(error);
     }
@@ -182,6 +191,7 @@ export default function Record() {
       console.log("Starting Recording...");
       setIsRecording(true);
       autoPlayTrack();
+      setStartPosition(0);
       const { recording } = await Audio.Recording.createAsync(
         Audio.RecordingOptionsPresets.HIGH_QUALITY
       );
@@ -205,25 +215,40 @@ export default function Record() {
       setPlaying(false);
       setIsRecording(false);
       const uri = recordedTrack.getURI();
-
+      
       if (uri) {
         const fileUri = `${
           FileSystem.documentDirectory
-        }${title}_vocals${Math.floor(Math.random() * 10)}.mp3`;
+        }${title}recording_${Date.now()}.wav`;
         await FileSystem.moveAsync({ from: uri, to: fileUri });
         setVocals(fileUri);
         console.log("Vocals Saved at:", fileUri);
+      }
+      setLoading(true);
+
+      if(uri){
+        const outPutFilePAth = `${FileSystem.documentDirectory}_trimmed_${title}${Date.now()}.mp3`;
+
+      const music = await AudioProcessor.trimAudio(saveMusic, outPutFilePAth, startPosition, endPosition );
+      if(music){
+        setRecordedMusic(music);
+        console.log(music);
+        setLoading(false);
+      }
       }
 
       setFinished(true);
     } catch (error) {
       console.log(error);
+      setLoading(false);
     }
   };
 
   useEffect(() => {
     setProcessedVocals(null);
   }, []);
+
+  console.log(`Music Started from ${startPosition} and Ended at ${endPosition}`);
 
   return (
     <SafeAreaView style={{ width: "100%", height: "100%" }}>
@@ -375,7 +400,7 @@ export default function Record() {
               pathname: "/screens/preview",
               params: {
                 vocals: vocals,
-                music: saveMusic,
+                music: recordedMusic,
                 coverPhoto: coverPhoto,
                 title: title,
                 artists: artists,
@@ -404,6 +429,7 @@ export default function Record() {
           </Link>
         </View>
       </View>
+        <LoadingScreen visible={loading} />
     </SafeAreaView>
   );
 }

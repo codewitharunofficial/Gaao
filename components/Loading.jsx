@@ -1,17 +1,23 @@
 // LoadingScreen.js
 import React from 'react';
 import { View, Text, StyleSheet, Image, ActivityIndicator } from 'react-native';
+import { ThemedView } from './ThemedView';
+import { useThemeColor } from '@/hooks/useThemeColor';
+import { ThemedText } from './ThemedText';
 
 const LoadingScreen = () => {
+
+  const  themeColor = useThemeColor({light: 'black', dark: 'white'});
+
   return (
-    <View style={styles.container}>
+    <ThemedView style={styles.container}>
       <Image 
-        source={require('./assets/Gaao-Icon.png')} 
+        source={require('@/assets/images/Gaao-Icon.png')}
         style={styles.logo} 
       />
-      <ActivityIndicator size="large" color="#00ff00" style={styles.loader} />
-      <Text style={styles.text}>Please Wait...</Text>
-    </View>
+      <ActivityIndicator size="large" color="" style={styles.loader} />
+      <ThemedText style={styles.text}>Please Wait...</ThemedText>
+    </ThemedView>
   );
 };
 
@@ -20,7 +26,8 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#000',  // Dark background for a karaoke vibe
+    backfaceVisibility: 'visible'
+    // backgroundColor: '#000',  // Dark background for a karaoke vibe
   },
   logo: {
     width: 150,
@@ -32,7 +39,7 @@ const styles = StyleSheet.create({
   },
   text: {
     fontSize: 18,
-    color: '#fff',
+    // color: '#fff',
     fontWeight: 'bold',
   },
 });

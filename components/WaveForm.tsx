@@ -14,7 +14,7 @@ const {vocalsWave, setVocalsWave} = useContext(Visualizer);
 const {musicWave, setMusicWave} = useContext(Visualizer);
 
   return (
-    <View style={{width: '100%',}} >
+    <View style={{width: '90%',}} >
       <Waveform mode='static' ref={ref} path={uri} candleSpace={2} candleWidth={4} candleHeightScale={10} scrubColor='purple' waveColor='white' onPanStateChange={isMoving => console.log(isMoving)} onError={error => console.log(error)} onChangeWaveformLoadState={(state) => { state && setMusicWave(true); setVocalsWave(true)}} />
     </View>
   )

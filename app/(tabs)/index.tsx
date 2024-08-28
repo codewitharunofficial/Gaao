@@ -7,20 +7,21 @@ import ShortcutStrips from '@/components/ShortcutStrips';
 import axios from 'axios'
 import TrackCard from '@/components/TrackCard';
 import { Auth } from '@/hooks/Context/User';
+import LoadingScreen from '@/components/Loading';
 
 
 export default function HomeScreen() {
 
   const {user} = useContext(Auth);
 
-  const [userType, setUserType] = useState("Old");
+  
+
+  // const [userType, setUserType] = useState("Old");
   const [tracks, setTracks] = useState([]);
 
   const getKaraokes = async () => {
     try {
-    //   const response = await fetch('http://192.168.43.224:6969/api/v1/karaoke/get-tracks');
-    // console.log(response);
-    const {data} = await axios.get(`http://192.168.83.47:6969/api/v1/karaoke/get-tracks`);
+    const {data} = await axios.get(`${process.env.EXPO_PUBLIC_URL}/api/v1/karaoke/get-tracks`);
     if(data && data?.success){
       setTracks(data.tracks);
     }
@@ -34,8 +35,8 @@ export default function HomeScreen() {
   }, []);
 
   return (
-    userType === "New" ? (
-      <WelcomeScreen />
+    tracks.length === 0 ? (
+      <LoadingScreen />
     ) : (
       <SafeAreaView style={{width: '100%', height: '100%'}} >
       <View style={{width: '100%', height: '100%', paddingHorizontal: 10}} >

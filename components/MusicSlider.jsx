@@ -12,76 +12,14 @@ import { PlayerControls } from "@/hooks/Context/Player";
 import { RecordedTrack } from "@/hooks/Context/Recording";
 import { EfxControls } from "@/hooks/Context/ProcessedAudio";
 
-const MusicSlider = ({ title, url }) => {
-  const [isMusicPlaying, setIsMusicPlaying] = useState(false);
-  const [isPaused, setIsPaused] = useState(false);
-  const [position, setPosition] = useState(0);
-  const { trackVolume, setTrackVolume } = useContext(PlayerControls);
-  const { currentSound, setCurrentSound } = useContext(TrackControls);
-  const [sound, setSound] = useState();
+const MusicSlider = ({ title, url, isMusicPlaying, setIsMusicPlaying }) => {
+  
   const { setMusicWave } = useContext(Visualizer);
-  const { processedVocals, setProcessedVocals } = useContext(RecordedTrack);
-  const { appliedEfx, currentEfx } = useContext(EfxControls);
+  const {trackVolume, setTrackVolume} = useContext(PlayerControls);
+  
 
-  const playMusic = async () => {
-    try {
-      if (sound) {
-        await sound.stopAsync();
-        setIsMusicPlaying(false);
-      } else {
-        const { sound, status } = await Audio.Sound.createAsync({ uri: url });
-        await sound.playAsync();
-        setIsMusicPlaying(true);
-        setSound(sound);
 
-        async function unload(status) {
-          try {
-            if (status.didJustFinish) {
-              await sound.unloadAsync();
-              setIsMusicPlaying(false);
-            }
-          } catch (error) {
-            console.log(error);
-          }
-        }
 
-        sound.setOnPlaybackStatusUpdate((status) => {
-          if (status.didJustFinish) {
-            unload(status);
-          }
-        });
-      }
-    } catch (error) {
-      console.log(error);
-    }
-  };
-
-  const pauseMusic = async () => {
-    try {
-      await sound.pauseAsync();
-      setIsMusicPlaying(false);
-      setIsPaused(true);
-    } catch (error) {
-      console.log(error);
-    }
-  };
-
-  async function handleVolume(volume) {
-    try {
-      // await currentSound.setVolumeAsync(volume);
-      await sound.setVolumeAsync(volume);
-    } catch (error) {
-      console.log(error);
-    }
-  }
-
-  console.log(appliedEfx, currentEfx);
-
-  useEffect(() => {
-    if (processedVocals && appliedEfx !== currentEfx) {
-      playMusic();
-    }
-  }, [currentEfx, processedVocals]);
 
   return (
     <View
@@ -130,14 +68,14 @@ const MusicSlider = ({ title, url }) => {
         </View>
         {isMusicPlaying ? (
           <Ionicons
-            onPress={() => pauseMusic()}
+            // onPress={() => pauseMusic()}
             name="pause"
             size={30}
             color={"black"}
           />
         ) : (
           <Ionicons
-            onPress={() => playMusic()}
+            // onPress={() => playMusic()}
             name="play"
             size={30}
             color={"black"}
@@ -150,7 +88,6 @@ const MusicSlider = ({ title, url }) => {
             maximumValue={1}
             minimumValue={0}
             onValueChange={(value) => {
-              currentSound && handleVolume(value);
               setTrackVolume(value);
             }}
             style={{
