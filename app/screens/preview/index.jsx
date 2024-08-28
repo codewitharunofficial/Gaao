@@ -30,6 +30,7 @@ import { PlayerControls } from "@/hooks/Context/Player";
 import { EfxControls } from "@/hooks/Context/ProcessedAudio";
 import SyncModal from "@/components/Models/SyncModal";
 import { TrackControls } from "@/hooks/Context/Karaoke";
+import { VocalControls } from "@/hooks/Context/Vocals";
 
 const PreviewScreen = () => {
   const { AudioProcessor } = NativeModules;
@@ -46,29 +47,20 @@ const PreviewScreen = () => {
   const { processedVocals, setProcessedVocals } = useContext(RecordedTrack);
   const { trackVolume, setTrackVolume } = useContext(PlayerControls);
   const { currentSound, setCurrentSound } = useContext(TrackControls);
-  const { currentVocals, setCurrentVocals } = useContext(TrackControls);
+  const { currentVocals, setCurrentVocals } = useContext(VocalControls);
   const { isProcessing, setIsProcessing } = useContext(EfxControls);
   const { efxList, setEfxList } = useContext(EfxControls);
   const { appliedEfx, currentEfx } = useContext(EfxControls);
   const [isMusicPlaying, setIsMusicPlaying] = useState(false);
   const [isVocalPlaying, setIsVocalPlaying] = useState(false);
   const [vocalsVolume, setVocalsVolume] = useState(1.0);
-  const isMounted = useRef(true);
-
-  useEffect(() => {
-    if (!currentSound && !currentVocals)
-      return () => {
-        isMounted.current = false;
-        stopPlayback();
-      };
-  }, [currentSound]);
+  
 
   const loadAndPlaySound = async (sound, filePath, volume) => {
     try {
       if (sound) {
         await sound.unloadAsync();
       }
-
       const { sound: newSound, status } = await Audio.Sound.createAsync(
         { uri: filePath },
         { shouldPlay: true, volume: volume }
@@ -83,35 +75,20 @@ const PreviewScreen = () => {
     }
   };
 
-  const stopPlayback = async () => {
+ 
+  async function playMusic() {
     try {
-      if (currentSound) {
+      if(currentSound !== null){
         await currentSound.stopAsync();
-        await currentSound.unloadAsync();
       }
-      if (currentVocals) {
-        await currentVocals.stopAsync();
-        await currentVocals.unloadAsync();
-      }
-
-      setCurrentSound(null);
-      setCurrentVocals(null);
-    } catch (error) {
-      console.log(`Error Stoping Tracks:`, error);
-    }
-  };
-
-  async function loadMusic() {
-    try {
       const musicSound = await loadAndPlaySound(
         currentSound,
         music,
         trackVolume
       );
       if (musicSound) {
-        console.log(musicSound);
         setIsMusicPlaying(true);
-        // setCurrentSound(musicSound);
+        setCurrentSound(musicSound);
       } else {
         console.log(`Error loading music`);
       }
@@ -120,17 +97,19 @@ const PreviewScreen = () => {
     }
   }
 
-  async function loadVocals() {
+  async function playVocals() {
     try {
+      if(currentVocals !== null){
+        await currentVocals.stopAsync();
+      }
       const vocalSound = await loadAndPlaySound(
         currentVocals,
         processedVocals ? processedVocals : vocals,
         vocalsVolume
       );
       if (vocalSound) {
-        console.log(vocalSound);
         setIsVocalPlaying(true);
-        // setCurrentVocals(vocalSound);
+        setCurrentVocals(vocalSound);
       } else {
         console.log(`Error loading vocals`);
       }
@@ -141,13 +120,15 @@ const PreviewScreen = () => {
 
   useEffect(() => {
     if (vocals || processedVocals) {
-      loadVocals();
+      playVocals();
     }
   }, [processedVocals]);
 
   useEffect(() => {
-    loadMusic();
+    playMusic();
   }, [processedVocals]);
+
+  console.log(currentVocals, currentSound);
 
   const efx = [
     {

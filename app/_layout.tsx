@@ -16,6 +16,7 @@ import { VisualizerContext } from "@/hooks/Context/WaveForm";
 import { PlayerContext } from "@/hooks/Context/Player";
 import { EfxContext } from "@/hooks/Context/ProcessedAudio";
 import { UserContext } from "@/hooks/Context/User";
+import { VocalContext } from "@/hooks/Context/Vocals";
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
 
@@ -39,6 +40,7 @@ export default function RootLayout() {
     <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
       <UserContext>
       <VisualizerContext>
+      <VocalContext>
         <EfxContext>
         <PlayerContext>
         <KaraokeContext>
@@ -52,6 +54,7 @@ export default function RootLayout() {
         </KaraokeContext>
         </PlayerContext>
         </EfxContext>
+      </VocalContext>
       </VisualizerContext>
       </UserContext>
     </ThemeProvider>
