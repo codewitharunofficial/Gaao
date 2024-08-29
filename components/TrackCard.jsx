@@ -6,7 +6,7 @@ import { ThemedText } from "./ThemedText";
 import { ThemedView } from "./ThemedView";
 import { Link } from "expo-router";
 
-const TrackCard = ({ coverPhoto, title, artists, lyrics, url, duration }) => {
+const TrackCard = ({ coverPhoto, title, artists, lyrics, url, duration, format }) => {
   return (
       <TouchableOpacity
         activeOpacity={0.8}
@@ -63,7 +63,7 @@ const TrackCard = ({ coverPhoto, title, artists, lyrics, url, duration }) => {
             {artists}
           </ThemedText>
         </View>
-        <Link href={{pathname: '/screens', params: {title: title, artists: artists, lyrics: lyrics, url: url, coverPhoto: coverPhoto ? coverPhoto : null}}} asChild >
+        <Link href={{pathname: '/screens', params: {title: title, artists: artists, lyrics: lyrics, url: url, coverPhoto: coverPhoto ? coverPhoto : null, format: format}}} asChild >
         <TouchableOpacity style={{backgroundColor: 'lightblue', padding: 10, borderRadius: 50 }} >
           <Entypo name="modern-mic" size={30} color={"black"} />
         </TouchableOpacity>

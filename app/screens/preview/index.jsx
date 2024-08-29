@@ -119,16 +119,19 @@ const PreviewScreen = () => {
   }
 
   useEffect(() => {
-    if (vocals || processedVocals) {
+    if (vocals || processedVocals && currentSound !==null) {
       playVocals();
     }
   }, [processedVocals]);
 
   useEffect(() => {
-    playMusic();
+    if(music && currentSound){
+      playMusic();
+    }
   }, [processedVocals]);
 
-  console.log(currentVocals, currentSound);
+  console.log(music);
+  console.log("Music SOund" + currentSound);
 
   const efx = [
     {

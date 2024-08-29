@@ -8,11 +8,31 @@ import axios from 'axios'
 import TrackCard from '@/components/TrackCard';
 import { Auth } from '@/hooks/Context/User';
 import LoadingScreen from '@/components/Loading';
+import * as MediaLibrary from 'expo-media-library';
+
 
 
 export default function HomeScreen() {
 
   const {user} = useContext(Auth);
+  const [permissionResponse, requestPermission] = MediaLibrary.usePermissions();
+
+  async function getStoragePermission(){
+    try {
+      if(permissionResponse?.status !== 'granted'){
+        console.log("No Permissions, Asking..!!")
+        await requestPermission();
+      } else {
+        console.log("You have Storage Permissions")
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
+  useEffect(() => {
+    getStoragePermission();
+  }, [])
 
   
 
@@ -52,7 +72,7 @@ export default function HomeScreen() {
         {
           tracks.length > 0 && (
             tracks.map((track, idx) => (
-              <TrackCard key={idx} title={track.title} coverPhoto={track?.karaokeCoverPhoto ? track.karaokeCoverPhoto.secure_url : null} artists={track.artists} lyrics ={track.lyrics} url={track.track.secure_url} duration={track.track.duration} />
+              <TrackCard key={idx} title={track.title} coverPhoto={track?.karaokeCoverPhoto ? track.karaokeCoverPhoto.secure_url : null} artists={track.artists} lyrics ={track.lyrics} url={track.track.secure_url} duration={track.track.duration} format={track.track.format} />
             ))
           )
         }

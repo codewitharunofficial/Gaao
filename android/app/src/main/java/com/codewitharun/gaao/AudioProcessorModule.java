@@ -11,6 +11,7 @@ import com.facebook.react.bridge.ReactMethod;
 import com.facebook.react.bridge.ReadableMap;
 
 import java.io.File;
+import android.net.Uri;
 
 public class AudioProcessorModule extends ReactContextBaseJavaModule {
 
@@ -345,7 +346,13 @@ public class AudioProcessorModule extends ReactContextBaseJavaModule {
     @ReactMethod
     public void trimAudio(String inputFilePath, String outputFilePath, int startMs, int endMs, Promise promise) {
         try {
-            String cmd = String.format("-i %s -ss %d -to %d -c copy %s", inputFilePath, startMs / 1000, endMs / 1000, outputFilePath);
+
+            String outputPath = Uri.decode(outputFilePath);
+            String inputPath = Uri.decode(inputFilePath);
+            
+            String cmd = String.format("-i %s -ss %d -to %d -c copy %s", inputPath, startMs / 1000, endMs / 1000, outputPath);
+
+            
         
         FFmpegSession session = FFmpegKit.execute(cmd);
     

@@ -2,22 +2,15 @@ import Ionicons from "@expo/vector-icons/Ionicons";
 import {
   StyleSheet,
   Image,
-  Platform,
   SafeAreaView,
   View,
   ScrollView,
   Text,
   TouchableOpacity,
-  PermissionsAndroid,
 } from "react-native";
-import ParallaxScrollView from "@/components/ParallaxScrollView";
-import { ThemedText } from "@/components/ThemedText";
-import { ThemedView } from "@/components/ThemedView";
 import {
   Link,
-  useGlobalSearchParams,
   useLocalSearchParams,
-  useNavigation,
 } from "expo-router";
 import SimpleLineIcons from "@expo/vector-icons/SimpleLineIcons";
 import Entypo from "@expo/vector-icons/Entypo";
@@ -25,7 +18,6 @@ import { useContext, useEffect, useState } from "react";
 import { Audio } from "expo-av";
 import { TrackControls } from "@/hooks/Context/Karaoke";
 import { RecordedTrack } from "@/hooks/Context/Recording";
-import PreviewScreen from "./preview";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import * as FileSystem from "expo-file-system";
 import * as MediaLibrary from "expo-media-library";
@@ -35,7 +27,7 @@ import { NativeModules } from "react-native";
 import LoadingScreen from "@/components/LoadingScreen";
 
 export default function Record() {
-  const { title, lyrics, artists, url, coverPhoto } = useLocalSearchParams();
+  const { title, lyrics, artists, url, coverPhoto, format } = useLocalSearchParams();
 
   const [fullScreen, setFullScreen] = useState(false);
   const [saveMusic, setSaveMusic] = useState();
@@ -58,11 +50,23 @@ export default function Record() {
 
   const theme = useThemeColor({ light: "black", dark: "white" });
 
+
   const checkIfAvailable = async () => {
     try {
       const data = await AsyncStorage.getItem(`${title}`);
       if (data) {
         const uri = JSON.parse(data);
+        // const asset = await MediaLibrary.createAssetAsync(uri);
+        // const ifAlbum = await MediaLibrary.getAlbumAsync("Gaao");
+        // if(ifAlbum !== null){
+        //   await MediaLibrary.addAssetsToAlbumAsync([asset], ifAlbum, false);
+        //   console.log("Adding file to Gaao");
+        // } else {
+        //   const gaao = await MediaLibrary.createAlbumAsync("Gaao", asset, false);
+        //   console.log("No Directory Found, Creating Gaao...")
+
+        // }
+
         setSaveMusic(uri);
         return true;
       } else {
@@ -79,7 +83,7 @@ export default function Record() {
       const isAvailable = await checkIfAvailable();
       console.log(isAvailable);
       if (!isAvailable) {
-        const fileUri = `${FileSystem.documentDirectory}${title}.mp3`;
+        const fileUri = `${FileSystem.documentDirectory}${title}.${format}`;
         const { uri } = await FileSystem.downloadAsync(url, fileUri);
         console.log("Audio File Saved To:", uri);
         await AsyncStorage.setItem(`${title}`, JSON.stringify(uri));
@@ -227,12 +231,11 @@ export default function Record() {
       setLoading(true);
 
       if(uri){
-        const outPutFilePAth = `${FileSystem.documentDirectory}_trimmed_${title}${Date.now()}.mp3`;
+        const outPutFilePAth = `${FileSystem.documentDirectory}_trimmed_${title}${Date.now()}.wav`;
 
       const music = await AudioProcessor.trimAudio(saveMusic, outPutFilePAth, startPosition, endPosition );
       if(music){
         setRecordedMusic(music);
-        console.log(music);
         setLoading(false);
       }
       }
@@ -248,7 +251,9 @@ export default function Record() {
     setProcessedVocals(null);
   }, []);
 
-  console.log(`Music Started from ${startPosition} and Ended at ${endPosition}`);
+  // useEffect(() => {
+  //    createDirectories();
+  // }, [])
 
   return (
     <SafeAreaView style={{ width: "100%", height: "100%" }}>
