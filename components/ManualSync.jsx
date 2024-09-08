@@ -16,18 +16,20 @@ const ManualSync = ({ onApplySync, vocals, title, setSync }) => {
   useEffect(() => {
 
       const applySync = async () => {
-          const outputFilePath =  `${FileSystem.cacheDirectory}${title}${Math.floor(Math.random())}.wav`;
+          const outputFilePath =  `${FileSystem.cacheDirectory}${title}${Date.now()}.wav`;
 
-          onApplySync(vocals, outputFilePath, delay,);
+          onApplySync(vocals, outputFilePath, delay);
       };
       if(applyManualFx){
           applySync();
       }
   }, [delay, applyManualFx]);
 
+  console.log(delay);
+
   const efx = {
-    type: "Reverb",
-    preset: currentEfx,
+    type: "Sync",
+    preset: currentEfx ? currentEfx : null,
     values: []
   }
 
@@ -36,8 +38,8 @@ const ManualSync = ({ onApplySync, vocals, title, setSync }) => {
       <Text style={styles.label}>Delay-in-seconds</Text>
       <Slider
         style={styles.slider}
-        minimumValue={-3}
-        maximumValue={3}
+        minimumValue={-1}
+        maximumValue={1}
         value={delay}
         onValueChange={(value) => {
           setDelay(value);

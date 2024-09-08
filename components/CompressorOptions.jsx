@@ -13,7 +13,7 @@ import { Picker } from "@react-native-picker/picker";
 import ManualCompressor from "./ManualCompressor";
 import { EfxControls } from "@/hooks/Context/ProcessedAudio";
 
-const CompressorOptions = ({ vocals, title, name }) => {
+const CompressorOptions = ({ vocals, title, name, setApplyCompressor }) => {
   const { AudioProcessor } = NativeModules;
   const { processedVocals, setProcessedVocals } = useContext(RecordedTrack);
   const [selectedPreset, setSelectedPreset] = useState("Default");
@@ -89,10 +89,10 @@ const CompressorOptions = ({ vocals, title, name }) => {
   };
 
   const efx = {
-    type: "Reverb",
-    preset: currentEfx,
-    values: []
-  }
+    type: "Compressor",
+    preset: currentEfx ? currentEfx : null,
+    values: [],
+  };
 
   return (
     <View
@@ -139,25 +139,29 @@ const CompressorOptions = ({ vocals, title, name }) => {
           vocals={vocals}
           title={name}
         />
-      <TouchableOpacity
-        onPress={() => {
-          efxList.push(efx);
-          setApplyEfx(false);
-          setIsProcessing(true);
-        }}
-        style={{
-          width: "20%",
-          height: "10%",
-          backgroundColor: "green",
-          position: "absolute",
-          bottom: 10,
-          right: 5,
-        }}
-      >
-        <Text style={{ fontSize: 12, fontWeight: "bold", color: "black" }}>
-          Apply-Changes
-        </Text>
-      </TouchableOpacity>
+        <TouchableOpacity
+          onPress={() => {
+            efxList.push(efx);
+            setApplyEfx(false);
+            setIsProcessing(true);
+            setApplyCompressor(false);
+          }}
+          style={{
+            width: "20%",
+            height: "10%",
+            backgroundColor: "green",
+            position: "absolute",
+            bottom: 10,
+            right: 5,
+            borderRadius: 10,
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+        >
+          <Text style={{ fontSize: 12, fontWeight: "bold", color: "black" }}>
+            Apply-Changes
+          </Text>
+        </TouchableOpacity>
       </View>
     </View>
   );

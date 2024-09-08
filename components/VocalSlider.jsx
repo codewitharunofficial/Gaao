@@ -1,21 +1,17 @@
-import { StyleSheet, Text, View } from "react-native";
-import React, { useContext, useEffect, useState } from "react";
+import { StyleSheet, View } from "react-native";
+import React, { useContext, useEffect } from "react";
 import { ThemedText } from "./ThemedText";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import Slider from "@react-native-community/slider";
 import Ionicons from "@expo/vector-icons/Ionicons";
-import { Audio } from "expo-av";
 import WaveForm from "./WaveForm";
-import { TrackControls } from "@/hooks/Context/Karaoke";
-import { RecordedTrack } from "@/hooks/Context/Recording";
 import { Visualizer } from "@/hooks/Context/WaveForm";
-import { EfxControls } from "@/hooks/Context/ProcessedAudio";
+import { handleTrackVolume } from "@/constants/effects";
 
-const VocalSlider = ({ url, title, isVocalPlaying, setIsVocalPlaying, vocalsVolume, setVocalsVolume }) => {
+const VocalSlider = ({ url, title, isVocalPlaying, setIsVocalPlaying, vocalsVolume, setVocalsVolume, pauseVocals, resumeVocals }) => {
   
   const { setVocalsWave } = useContext(Visualizer);
 
-  
 
   return (
     <View
@@ -64,14 +60,15 @@ const VocalSlider = ({ url, title, isVocalPlaying, setIsVocalPlaying, vocalsVolu
         </View>
         {isVocalPlaying ? (
           <Ionicons
-            // onPress={() => pauseVocals()}
+            onPress={() => pauseVocals()}
             name="pause"
             size={30}
             color={"black"}
           />
         ) : (
           <Ionicons
-            // onPress={() => playVocals()}
+            onPress={() => {resumeVocals()}}
+            
             name="play"
             size={30}
             color={"black"}
@@ -84,7 +81,7 @@ const VocalSlider = ({ url, title, isVocalPlaying, setIsVocalPlaying, vocalsVolu
             maximumValue={1}
             minimumValue={0}
             onValueChange={(value) => {
-              setVocalsVolume(value);
+              setVocalsVolume(value)
             }}
             style={{
               width: "100%",

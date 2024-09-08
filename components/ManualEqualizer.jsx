@@ -7,6 +7,7 @@ const ManualEqualizer = ({ onApplyEqualizer, vocals, title }) => {
     const [bassGain, setBassGain] = useState(1);
     const [treble, setTreble] = useState(8);
     const [midGain, setMidGain] = useState(3);
+    const [applyEfx, setApplyEfx] = useState(false);
 
     const eqSettings = {
         bassGain,
@@ -14,15 +15,18 @@ const ManualEqualizer = ({ onApplyEqualizer, vocals, title }) => {
         midGain,
     };
 
-    // useEffect(() => {
+    useEffect(() => {
 
-    //     const applyReverb = async () => {
-    //         const outputFilePath =  `${FileSystem.cacheDirectory}${title}${Math.floor(Math.random())}.wav`;
+        const applyEQ = async () => {
+            const outputFilePath =  `${FileSystem.cacheDirectory}${title}${Date.now()}.wav`;
 
-    //         onApplyReverb(vocals, outputFilePath, reverbSettings);
-    //     };
-    //     applyReverb();
-    // }, [dryLevel, damping, roomSize, wetLevel]);
+            onApplyEqualizer(vocals, outputFilePath, eqSettings);
+        };
+        if(applyEfx){
+            applyEQ();
+        }
+        setApplyEfx(false);
+    }, [applyEfx]);
 
     return (
         <View style={styles.container}>
@@ -32,7 +36,7 @@ const ManualEqualizer = ({ onApplyEqualizer, vocals, title }) => {
                 minimumValue={0}
                 maximumValue={100}
                 value={bassGain}
-                onValueChange={value => {setBassGain(value)}}
+                onValueChange={value => {setBassGain(value); setApplyEfx(true)}}
                 minimumTrackTintColor="#1fb28a"
                 maximumTrackTintColor="#d3d3d3"
                 thumbTintColor="#b9e4c9"
@@ -43,7 +47,7 @@ const ManualEqualizer = ({ onApplyEqualizer, vocals, title }) => {
                 minimumValue={0}
                 maximumValue={100}
                 value={midGain}
-                onValueChange={value => {setMidGain(value)}}
+                onValueChange={value => {setMidGain(value); setApplyEfx(true)}}
                 minimumTrackTintColor="#1fb28a"
                 maximumTrackTintColor="#d3d3d3"
                 thumbTintColor="#b9e4c9"
@@ -54,7 +58,7 @@ const ManualEqualizer = ({ onApplyEqualizer, vocals, title }) => {
                 minimumValue={0}
                 maximumValue={100}
                 value={treble}
-                onValueChange={value => {setTreble(value)}}
+                onValueChange={value => {setTreble(value); setApplyEfx(true)}}
                 minimumTrackTintColor="#1fb28a"
                 maximumTrackTintColor="#d3d3d3"
                 thumbTintColor="#b9e4c9"

@@ -9,7 +9,7 @@ const EqualizerModel = ({applyEQ, setApplyEQ, height, modalColor, vocals, title,
     <BottomModal overlayBackgroundColor="#000" modalStyle={{height: height * 3/5, justifyContent: 'center', alignItems: 'center', backgroundColor: modalColor}} visible={applyEQ} onHardwareBackPress={() => setApplyEQ(false)} onSwiping={() => setApplyEQ(!applyEQ)} swipeDirection={["down", "up"]} swipThreshold={100} >
           <ModalContent style={{height: "auto", paddingVeritical: 10, borderTopLeftRadius: 20, borderTopRightRadius: 20, backgroundColor: modalColor, padding: 20,}} >
 
-            <EqualizerOptions vocals={vocals} title={"Equalizer-Presets"} name={title}  />
+            <EqualizerOptions vocals={vocals} title={"Equalizer-Presets"} name={title} setApplyEQ={setApplyEQ}  />
 
           </ModalContent>
         </BottomModal>

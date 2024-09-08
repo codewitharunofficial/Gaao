@@ -1,4 +1,4 @@
-import { Image, StyleSheet, Platform, Button, TouchableOpacity, ScrollView, SafeAreaView, View } from 'react-native';
+import { Image, StyleSheet, Platform, Button, TouchableOpacity, ScrollView, SafeAreaView, View, PermissionsAndroid, Linking, Alert } from 'react-native';
 import WelcomeScreen from '@/components/Welcome';
 import ParallaxScrollView from '@/components/ParallaxScrollView';
 import { useContext, useEffect, useState } from 'react';
@@ -7,35 +7,57 @@ import ShortcutStrips from '@/components/ShortcutStrips';
 import axios from 'axios'
 import TrackCard from '@/components/TrackCard';
 import { Auth } from '@/hooks/Context/User';
-import LoadingScreen from '@/components/Loading';
 import * as MediaLibrary from 'expo-media-library';
+import * as Updates from 'expo-updates';
+import { checkForUpdates } from '@/constants/updates';
+import LoadingScreen from '@/components/LoadingScreen';
+import { useUpdates } from 'expo-updates';
+import Toast from "react-native-simple-toast"
+import UpdatesModal from '@/components/Models/UpdatesModal';
 
 
 
 export default function HomeScreen() {
 
   const {user} = useContext(Auth);
-  const [permissionResponse, requestPermission] = MediaLibrary.usePermissions();
+  // const [permissionResponse, requestPermission] = MediaLibrary.usePermissions();
+  const {currentlyRunning, isUpdateAvailable, isUpdatePending} = useUpdates();
 
-  async function getStoragePermission(){
+  const visible = isUpdateAvailable;
+
+  useEffect(() => {
+    if(isUpdatePending){
+      Updates.reloadAsync();
+    }
+  },[isUpdatePending]);
+
+
+  async function askPermissions(){
     try {
-      if(permissionResponse?.status !== 'granted'){
-        console.log("No Permissions, Asking..!!")
-        await requestPermission();
+      const {status} = await MediaLibrary.requestPermissionsAsync();
+      if(status !== 'granted'){
+        Alert.alert('Permissions Required!', "Gaao needs to access your media library to save files");
+        return false;
       } else {
-        console.log("You have Storage Permissions")
+        return true;
       }
     } catch (error) {
       console.log(error);
     }
   }
 
-  useEffect(() => {
-    getStoragePermission();
-  }, [])
+  async function getPermissions(){
+    const {status} = await MediaLibrary.getPermissionsAsync();
+    if(status === 'granted'){
+      Toast.show("Permssions Granted", 2000);
+      return true
+    } else {
+      Toast.show("Asking Permssions...!", 3000);
+      return askPermissions();
+    }
+  }
 
-  
-
+  useEffect(() => {getPermissions()},[]);
   // const [userType, setUserType] = useState("Old");
   const [tracks, setTracks] = useState([]);
 
@@ -55,10 +77,7 @@ export default function HomeScreen() {
   }, []);
 
   return (
-    tracks.length === 0 ? (
-      <LoadingScreen />
-    ) : (
-      <SafeAreaView style={{width: '100%', height: '100%'}} >
+    <SafeAreaView style={{width: '100%', height: '100%'}} >
       <View style={{width: '100%', height: '100%', paddingHorizontal: 10}} >
         <Image
           source={require('@/assets/images/newly-added.webp')}
@@ -70,17 +89,19 @@ export default function HomeScreen() {
         </ThemedView>
         <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{width: '100%', height: 'auto', flexDirection: 'column', gap: 15, alignItems: 'center'}} >
         {
-          tracks.length > 0 && (
+          tracks.length > 0 ? (
             tracks.map((track, idx) => (
               <TrackCard key={idx} title={track.title} coverPhoto={track?.karaokeCoverPhoto ? track.karaokeCoverPhoto.secure_url : null} artists={track.artists} lyrics ={track.lyrics} url={track.track.secure_url} duration={track.track.duration} format={track.track.format} />
             ))
+          ) : (
+            <LoadingScreen />
           )
         }
         </ScrollView>
+        <UpdatesModal visible={visible} />
         
     </View>
       </SafeAreaView>
-    )
     
   );
 }

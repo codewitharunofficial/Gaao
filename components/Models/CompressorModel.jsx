@@ -10,7 +10,7 @@ const CompressorModal = ({applyCompressor, setApplyCompressor, height, modalColo
     <BottomModal overlayBackgroundColor="#000" modalStyle={{height: height * 3/5, justifyContent: 'center', alignItems: 'center', backgroundColor: modalColor}} visible={applyCompressor} onHardwareBackPress={() => setApplyReverb(false)} onSwiping={() => setApplyCompressor(!applyCompressor)} swipeDirection={["down", "up"]} swipThreshold={100} >
           <ModalContent style={{height: "auto", paddingVeritical: 10, borderTopLeftRadius: 20, borderTopRightRadius: 20, backgroundColor: modalColor, padding: 20,}} >
 
-            <CompressorOptions vocals={vocals} title={"Compressor-Presets"} name={title} />
+            <CompressorOptions vocals={vocals} title={"Compressor-Presets"} name={title} setApplyCompressor={setApplyCompressor} />
 
           </ModalContent>
         </BottomModal>

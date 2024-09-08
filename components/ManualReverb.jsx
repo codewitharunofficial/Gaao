@@ -4,48 +4,52 @@ import Slider from '@react-native-community/slider';
 import * as FileSystem from 'expo-file-system';
 
 const ManualReverb = ({ onApplyReverb, vocals, title }) => {
-    const [roomSize, setRoomSize] = useState(50);
-    const [damping, setDamping] = useState(50);
+    const [delay, setDelay] = useState(50);
+    const [decay, setDecay] = useState(10);
     const [wetLevel, setWetLevel] = useState(50);
     const [dryLevel, setDryLevel] = useState(50);
+    const [applyEfx, setApplyEfx] = useState(false);
 
     const reverbSettings = {
-        roomSize,
-        damping,
+        delay,
+        decay,
         wetLevel,
         dryLevel
     };
 
-    // useEffect(() => {
+    useEffect(() => {
+        
+        const applyReverb = async () => {
+            const outputFilePath =  `${FileSystem.cacheDirectory}${title}${Math.floor(Date.now())}.wav`;
 
-    //     const applyReverb = async () => {
-    //         const outputFilePath =  `${FileSystem.cacheDirectory}${title}${Math.floor(Math.random())}.wav`;
-
-    //         onApplyReverb(vocals, outputFilePath, reverbSettings);
-    //     };
-    //     applyReverb();
-    // }, [dryLevel, damping, roomSize, wetLevel]);
+            onApplyReverb(vocals, outputFilePath, reverbSettings);
+        };
+        if(applyEfx){
+            applyReverb();
+        }
+        setApplyEfx(false);
+    }, [applyEfx]);
 
     return (
         <View style={styles.container}>
-            <Text style={styles.label}>Room Size</Text>
+            <Text style={styles.label}>Delay</Text>
             <Slider
                 style={styles.slider}
                 minimumValue={0}
-                maximumValue={100}
-                value={roomSize}
-                onValueChange={value => {setRoomSize(value)}}
+                maximumValue={500}
+                value={delay}
+                onSlidingComplete={value => {setDelay(value); setApplyEfx(true)}}
                 minimumTrackTintColor="#1fb28a"
                 maximumTrackTintColor="#d3d3d3"
                 thumbTintColor="#b9e4c9"
             />
-            <Text style={styles.label}>Damping</Text>
+            <Text style={styles.label}>Decay</Text>
             <Slider
                 style={styles.slider}
                 minimumValue={0}
                 maximumValue={100}
-                value={damping}
-                onValueChange={value => {setDamping(value)}}
+                value={decay}
+                onSlidingComplete={value => {setDecay(value); setApplyEfx(true)}}
                 minimumTrackTintColor="#1fb28a"
                 maximumTrackTintColor="#d3d3d3"
                 thumbTintColor="#b9e4c9"
@@ -56,7 +60,7 @@ const ManualReverb = ({ onApplyReverb, vocals, title }) => {
                 minimumValue={0}
                 maximumValue={100}
                 value={wetLevel}
-                onValueChange={value => {setWetLevel(value)}}
+                onSlidingComplete={value => {setWetLevel(value); setApplyEfx(true)}}
                 minimumTrackTintColor="#1fb28a"
                 maximumTrackTintColor="#d3d3d3"
                 thumbTintColor="#b9e4c9"
@@ -67,7 +71,7 @@ const ManualReverb = ({ onApplyReverb, vocals, title }) => {
                 minimumValue={0}
                 maximumValue={100}
                 value={dryLevel}
-                onValueChange={value => {setDryLevel(value)}}
+                onSlidingComplete={value => {setDryLevel(value); setApplyEfx(true)}}
                 minimumTrackTintColor="#1fb28a"
                 maximumTrackTintColor="#d3d3d3"
                 thumbTintColor="#b9e4c9"

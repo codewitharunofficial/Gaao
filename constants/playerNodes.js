@@ -73,3 +73,32 @@ export const createDirectories = async () => {
         console.log(error);
     }
 }
+
+export const pauseTrack = async (track) => {
+    try {
+        if(track){
+            const pause = await track.pauseAsync();
+            if(pause){
+                return true;
+            }
+        }
+    } catch (error) {
+        console.log(error)
+        return false
+    }
+}
+
+export const resumeTrack = async (track, position) => {
+    try {
+        if(track !== null){
+            const resume = await track.playFromPositionAsync(position);
+            if(resume){
+                return true
+            } else {
+                return false
+            }
+        }
+    } catch (error) {
+        console.log(error);
+    }
+}

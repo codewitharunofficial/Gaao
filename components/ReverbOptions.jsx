@@ -15,13 +15,13 @@ import ManualReverb from "./ManualReverb";
 import { Picker } from "@react-native-picker/picker";
 import { EfxControls } from "@/hooks/Context/ProcessedAudio";
 
-const ReverbOptions = ({ vocals, title, name }) => {
+const ReverbOptions = ({ vocals, title, name, setApplyReverb }) => {
   const { AudioProcessor } = NativeModules;
   const { processedVocals, setProcessedVocals } = useContext(RecordedTrack);
   const [selectedPreset, setSelectedPreset] = useState("Default");
   const theme = useThemeColor({ light: "black", dark: "white" });
   const textColor = useThemeColor({ light: "white", dark: "black" });
-  const buttonColor = useThemeColor({light: 'lightblue', dark: 'yellow'});
+  const buttonColor = useThemeColor({ light: "lightblue", dark: "yellow" });
   const [applyEfx, setApplyEfx] = useState(false);
   const { appliedEfx, setAppliedEfx } = useContext(EfxControls);
   const { currentEfx, setCurrentEfx } = useContext(EfxControls);
@@ -102,6 +102,7 @@ const ReverbOptions = ({ vocals, title, name }) => {
     AudioProcessor.applyManualReverb(vocals, outputFilePath, reverbSettings)
       .then((result) => {
         console.log("Processed audio saved at:", result);
+        setProcessedVocals(result);
       })
       .catch((error) => {
         console.error("Error applying manual reverb:", error);
@@ -111,8 +112,8 @@ const ReverbOptions = ({ vocals, title, name }) => {
   const efx = {
     type: "Reverb",
     preset: currentEfx,
-    values: []
-  }
+    values: [],
+  };
 
   return (
     <View
@@ -159,11 +160,30 @@ const ReverbOptions = ({ vocals, title, name }) => {
           vocals={vocals}
           title={name}
         />
-     <TouchableOpacity onPress={() => {efxList.push(efx); setApplyEfx(false); setIsProcessing(true)}} style={{width: '20%', height: '10%', backgroundColor: 'green', position: 'absolute', bottom: 10, right: 5}} >
-         <Text style={{fontSize: 12, fontWeight: 'bold', color: 'black'}} >Apply-Changes</Text>
-     </TouchableOpacity>
+        <TouchableOpacity
+          onPress={() => {
+            efxList.push(efx);
+            setApplyEfx(false);
+            setIsProcessing(true);
+            setApplyReverb(false);
+          }}
+          style={{
+            width: "20%",
+            height: "10%",
+            backgroundColor: "green",
+            position: "absolute",
+            bottom: 10,
+            right: 5,
+            borderRadius: 10,
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+        >
+          <Text style={{ fontSize: 12, fontWeight: "bold", color: "black" }}>
+            Apply-Changes
+          </Text>
+        </TouchableOpacity>
       </View>
-
     </View>
   );
 };

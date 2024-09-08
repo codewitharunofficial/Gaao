@@ -7,11 +7,11 @@ import {
   ScrollView,
   Text,
   TouchableOpacity,
+  Platform,
+  PermissionsAndroid,
+  Linking,
 } from "react-native";
-import {
-  Link,
-  useLocalSearchParams,
-} from "expo-router";
+import { Link, useLocalSearchParams } from "expo-router";
 import SimpleLineIcons from "@expo/vector-icons/SimpleLineIcons";
 import Entypo from "@expo/vector-icons/Entypo";
 import { useContext, useEffect, useState } from "react";
@@ -25,9 +25,11 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useThemeColor } from "@/hooks/useThemeColor";
 import { NativeModules } from "react-native";
 import LoadingScreen from "@/components/LoadingScreen";
+import Toast from 'react-native-simple-toast';
 
 export default function Record() {
-  const { title, lyrics, artists, url, coverPhoto, format } = useLocalSearchParams();
+  const { title, lyrics, artists, url, coverPhoto, format } =
+    useLocalSearchParams();
 
   const [fullScreen, setFullScreen] = useState(false);
   const [saveMusic, setSaveMusic] = useState();
@@ -45,7 +47,7 @@ export default function Record() {
   const { processedVocals, setProcessedVocals } = useContext(RecordedTrack);
   const [isLoaded, setIsLoaded] = useState(false);
   const [recordedMusic, setRecordedMusic] = useState();
-  const {AudioProcessor} = NativeModules;
+  const { AudioProcessor } = NativeModules;
   const [loading, setLoading] = useState(false);
 
   const theme = useThemeColor({ light: "black", dark: "white" });
@@ -56,17 +58,6 @@ export default function Record() {
       const data = await AsyncStorage.getItem(`${title}`);
       if (data) {
         const uri = JSON.parse(data);
-        // const asset = await MediaLibrary.createAssetAsync(uri);
-        // const ifAlbum = await MediaLibrary.getAlbumAsync("Gaao");
-        // if(ifAlbum !== null){
-        //   await MediaLibrary.addAssetsToAlbumAsync([asset], ifAlbum, false);
-        //   console.log("Adding file to Gaao");
-        // } else {
-        //   const gaao = await MediaLibrary.createAlbumAsync("Gaao", asset, false);
-        //   console.log("No Directory Found, Creating Gaao...")
-
-        // }
-
         setSaveMusic(uri);
         return true;
       } else {
@@ -81,11 +72,10 @@ export default function Record() {
   async function downloadMusic() {
     try {
       const isAvailable = await checkIfAvailable();
-      console.log(isAvailable);
       if (!isAvailable) {
         const fileUri = `${FileSystem.documentDirectory}${title}.${format}`;
+        
         const { uri } = await FileSystem.downloadAsync(url, fileUri);
-        console.log("Audio File Saved To:", uri);
         await AsyncStorage.setItem(`${title}`, JSON.stringify(uri));
         setSaveMusic(uri);
       } else {
@@ -93,6 +83,7 @@ export default function Record() {
       }
     } catch (error) {
       console.log(error);
+      Toast.show(error.message, 3000);
     }
   }
 
@@ -203,7 +194,7 @@ export default function Record() {
 
       recording.setOnRecordingStatusUpdate((status) => {
         if (status.isRecording) {
-          console.log(status.durationMillis);
+          
         }
       });
     } catch (error) {
@@ -219,7 +210,7 @@ export default function Record() {
       setPlaying(false);
       setIsRecording(false);
       const uri = recordedTrack.getURI();
-      
+
       if (uri) {
         const fileUri = `${
           FileSystem.documentDirectory
@@ -230,14 +221,21 @@ export default function Record() {
       }
       setLoading(true);
 
-      if(uri){
-        const outPutFilePAth = `${FileSystem.documentDirectory}_trimmed_${title}${Date.now()}.wav`;
+      if (uri) {
+        const outPutFilePAth = `${
+          FileSystem.documentDirectory
+        }_trimmed_${title}${Date.now()}.${format}`;
 
-      const music = await AudioProcessor.trimAudio(saveMusic, outPutFilePAth, startPosition, endPosition );
-      if(music){
-        setRecordedMusic(music);
-        setLoading(false);
-      }
+        const music = await AudioProcessor.trimAudio(
+          saveMusic,
+          outPutFilePAth,
+          startPosition,
+          endPosition
+        );
+        if (music) {
+          setRecordedMusic(music);
+          setLoading(false);
+        }
       }
 
       setFinished(true);
@@ -392,12 +390,12 @@ export default function Record() {
               borderWidth: StyleSheet.hairlineWidth,
               borderColor: "black",
               borderRadius: 60,
-              backgroundColor: isRecording ? "red" : "lightgreen",
+              backgroundColor: !saveMusic ? "gray" : isRecording ? "red" : "lightgreen",
             }}
           >
             <Entypo name="modern-mic" size={50} color={"black"} />
             <Text style={{ color: "black" }}>
-              {isRecording ? "Finish" : "Start"}
+              {isRecording ? "Finish" : !saveMusic ? "Loading" : "Start"}
             </Text>
           </TouchableOpacity>
           <Link
@@ -434,7 +432,7 @@ export default function Record() {
           </Link>
         </View>
       </View>
-        <LoadingScreen visible={loading} />
+      <LoadingScreen visible={loading} />
     </SafeAreaView>
   );
 }

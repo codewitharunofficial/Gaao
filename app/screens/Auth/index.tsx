@@ -1,4 +1,5 @@
 import {
+  Alert,
   Image,
   SafeAreaView,
   StyleSheet,
@@ -17,7 +18,9 @@ import { Auth } from "@/hooks/Context/User";
 import { useNavigation } from "@react-navigation/native";
 import { useRouter } from "expo-router";
 import { setNavigation } from "@/hooks/navigationRef";
-// WebBrowser.maybeCompleteAuthSession();
+import * as WebBrowser from "expo-web-browser";
+import Toast from 'react-native-simple-toast';
+WebBrowser.maybeCompleteAuthSession();
 
 const index = () => {
   const { user, setUser } = useContext(Auth);
@@ -58,6 +61,7 @@ const index = () => {
            await logIn(userData?.email);
         } else {
           console.log("Error While Fetching user from google");
+          Toast.show("Error While Fetching user from google");
         }
       }
     }
@@ -219,7 +223,7 @@ useEffect(() => {
         <TouchableOpacity
           onPress={() => {promptAsync(); setIsSigningUp(true)}}
           style={{
-            width: "35%",
+            width: "auto",
             height: "5%",
             flexDirection: "row",
             alignItems: "center",
@@ -237,7 +241,7 @@ useEffect(() => {
         <TouchableOpacity
           onPress={() => {token && !isExpired ? loginIfToken(token) : promptAsync(); setLogginIn(true)}}
           style={{
-            width: "35%",
+            width: "auto",
             height: "5%",
             flexDirection: "row",
             alignItems: "center",

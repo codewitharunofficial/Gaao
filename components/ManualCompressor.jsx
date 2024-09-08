@@ -5,10 +5,11 @@ import * as FileSystem from 'expo-file-system';
 
 const ManualCompressor = ({ onApplyCompressor, vocals, title }) => {
     const [ratio, setRatio] = useState(1);
-    const [attack, setAttack] = useState(8);
-    const [threshold, setThreshold] = useState(3);
+    const [attack, setAttack] = useState(0);
+    const [threshold, setThreshold] = useState(10);
     const [release, setRelease] = useState(0);
     const [makeupGain, setMakeUpGain] = useState(0);
+    const [applyEfx, setApplyEfx] = useState(false);
 
     const compressorSettings = {
         ratio,
@@ -18,15 +19,18 @@ const ManualCompressor = ({ onApplyCompressor, vocals, title }) => {
         makeupGain
     };
 
-    // useEffect(() => {
+    useEffect(() => {
 
-    //     const applyReverb = async () => {
-    //         const outputFilePath =  `${FileSystem.cacheDirectory}${title}${Math.floor(Math.random())}.wav`;
+        const applyCompressor = async () => {
+            const outputFilePath =  `${FileSystem.cacheDirectory}${title}${Math.floor(Math.random())}.wav`;
 
-    //         onApplyReverb(vocals, outputFilePath, reverbSettings);
-    //     };
-    //     applyReverb();
-    // }, [dryLevel, damping, roomSize, wetLevel]);
+            onApplyCompressor(vocals, outputFilePath, compressorSettings);
+        };
+        if(applyEfx){
+            applyCompressor();
+        }
+        setApplyEfx(false);
+    }, [applyEfx]);
 
     return (
         <View style={styles.container}>
@@ -36,7 +40,7 @@ const ManualCompressor = ({ onApplyCompressor, vocals, title }) => {
                 minimumValue={0}
                 maximumValue={100}
                 value={ratio}
-                onValueChange={value => {setRatio(value)}}
+                onValueChange={value => {setRatio(value); setApplyEfx(true)}}
                 minimumTrackTintColor="#1fb28a"
                 maximumTrackTintColor="#d3d3d3"
                 thumbTintColor="#b9e4c9"
@@ -47,7 +51,7 @@ const ManualCompressor = ({ onApplyCompressor, vocals, title }) => {
                 minimumValue={0}
                 maximumValue={100}
                 value={threshold}
-                onValueChange={value => {setThreshold(value)}}
+                onValueChange={value => {setThreshold(value); setApplyEfx(true)}}
                 minimumTrackTintColor="#1fb28a"
                 maximumTrackTintColor="#d3d3d3"
                 thumbTintColor="#b9e4c9"
@@ -55,10 +59,10 @@ const ManualCompressor = ({ onApplyCompressor, vocals, title }) => {
             <Text style={styles.label}>Attack</Text>
             <Slider
                 style={styles.slider}
-                minimumValue={0}
-                maximumValue={100}
+                minimumValue={100}
+                maximumValue={1000}
                 value={attack}
-                onValueChange={value => {setAttack(value)}}
+                onValueChange={value => {setAttack(value); setApplyEfx(true)}}
                 minimumTrackTintColor="#1fb28a"
                 maximumTrackTintColor="#d3d3d3"
                 thumbTintColor="#b9e4c9"
@@ -66,10 +70,10 @@ const ManualCompressor = ({ onApplyCompressor, vocals, title }) => {
             <Text style={styles.label}>Release</Text>
             <Slider
                 style={styles.slider}
-                minimumValue={0}
-                maximumValue={100}
+                minimumValue={100}
+                maximumValue={1000}
                 value={release}
-                onValueChange={value => {setRelease(value)}}
+                onValueChange={value => {setRelease(value); setApplyEfx(true)}}
                 minimumTrackTintColor="#1fb28a"
                 maximumTrackTintColor="#d3d3d3"
                 thumbTintColor="#b9e4c9"
@@ -80,7 +84,7 @@ const ManualCompressor = ({ onApplyCompressor, vocals, title }) => {
                 minimumValue={0}
                 maximumValue={100}
                 value={makeupGain}
-                onValueChange={value => {setMakeUpGain(value)}}
+                onValueChange={value => {setMakeUpGain(value); setApplyEfx(true)}}
                 minimumTrackTintColor="#1fb28a"
                 maximumTrackTintColor="#d3d3d3"
                 thumbTintColor="#b9e4c9"

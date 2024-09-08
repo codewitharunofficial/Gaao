@@ -12,13 +12,11 @@ import { PlayerControls } from "@/hooks/Context/Player";
 import { RecordedTrack } from "@/hooks/Context/Recording";
 import { EfxControls } from "@/hooks/Context/ProcessedAudio";
 
-const MusicSlider = ({ title, url, isMusicPlaying, setIsMusicPlaying }) => {
+const MusicSlider = ({ title, url, isMusicPlaying, setIsMusicPlaying, trackVolume, setTrackVolume, pauseTrack, resumeTrack }) => {
   
   const { setMusicWave } = useContext(Visualizer);
-  const {trackVolume, setTrackVolume} = useContext(PlayerControls);
+  // const {trackVolume, setTrackVolume} = useContext(PlayerControls);
   
-
-
 
 
   return (
@@ -68,14 +66,14 @@ const MusicSlider = ({ title, url, isMusicPlaying, setIsMusicPlaying }) => {
         </View>
         {isMusicPlaying ? (
           <Ionicons
-            // onPress={() => pauseMusic()}
+            onPress={() => pauseTrack()}
             name="pause"
             size={30}
             color={"black"}
           />
         ) : (
           <Ionicons
-            // onPress={() => playMusic()}
+            onPress={() => resumeTrack()}
             name="play"
             size={30}
             color={"black"}
