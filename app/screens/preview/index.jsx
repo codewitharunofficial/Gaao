@@ -35,6 +35,7 @@ import { VocalControls } from "@/hooks/Context/Vocals";
 import { useMusic } from "@/hooks/Context/Music";
 import { handleTrackVolume } from "@/constants/effects";
 import { pauseTrack, resumeTrack } from "@/constants/playerNodes";
+import * as Sentry from '@sentry/react-native';
 
 const PreviewScreen = () => {
   const { AudioProcessor } = NativeModules;
@@ -201,7 +202,7 @@ const PreviewScreen = () => {
     {
       id: 4,
       title: "Mix-Tracks",
-      onPress: () => handleMix(music, processedVocals, trackVolume, vocalsVolume),
+      onPress: () => handleMix(music, processedVocals ? processedVocals : vocals, trackVolume, vocalsVolume),
       image: require("@/assets/images/mix.jpg"),
     },
     {
@@ -215,7 +216,6 @@ const PreviewScreen = () => {
   async function masterTrack() {}
 
   const handleMix = async (musicFile, vocalFile, musicVolume, vocalVolume) => {
-    console.log(musicFile, vocalFile, musicVolume, vocalVolume);
     try {
       const result = await AudioProcessor.mixMusicAndVocals(
         musicFile,
@@ -228,11 +228,12 @@ const PreviewScreen = () => {
         setMix(result);
         const { musicSound: sound } = Audio.Sound.createAsync(
           { uri: result },
-          { shouldPlay: true }
+          { shouldPlay: false }
         );
       }
     } catch (error) {
-      console.log(error);
+      Sentry.captureException(error);
+      // console.log(error);
     }
   };
 

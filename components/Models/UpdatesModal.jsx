@@ -20,10 +20,10 @@ const UpdatesModal = ({visible}) => {
     isUpdateAvailable,
     isUpdatePending,
     isChecking,
-    isDownloading,
+    isDownloading
   } = useUpdates();
 
-  const [ifNewUpdate, setIfNewUpdate] = useState(isUpdateAvailable);
+  // const [ifNewUpdate, setIfNewUpdate] = useState(isUpdateAvailable);
 
   async function updateApp() {
     try {

@@ -12,6 +12,8 @@ import com.facebook.react.defaults.DefaultNewArchitectureEntryPoint.load
 import com.facebook.react.defaults.DefaultReactNativeHost
 import com.facebook.soloader.SoLoader
 import com.codewitharun.gaao.AudioProcessorPackage
+import com.codewitharun.gaao.GoogleAuthPackage
+import managePermission.PermissionFilePackage
 
 import expo.modules.ApplicationLifecycleDispatcher
 import expo.modules.ReactNativeHostWrapper
@@ -24,6 +26,8 @@ class MainApplication : Application(), ReactApplication {
           override fun getPackages(): List<ReactPackage> {
             val packages = PackageList(this).packages.toMutableList()
                 packages.add(AudioProcessorPackage())
+                packages.add(GoogleAuthPackage())
+                packages.add(PermissionFilePackage())
                 return packages
           }
 

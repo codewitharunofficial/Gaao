@@ -10,6 +10,7 @@ import {
   Platform,
   PermissionsAndroid,
   Linking,
+  Alert,
 } from "react-native";
 import { Link, useLocalSearchParams } from "expo-router";
 import SimpleLineIcons from "@expo/vector-icons/SimpleLineIcons";
@@ -25,7 +26,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useThemeColor } from "@/hooks/useThemeColor";
 import { NativeModules } from "react-native";
 import LoadingScreen from "@/components/LoadingScreen";
-import Toast from 'react-native-simple-toast';
+import Toast from "react-native-simple-toast";
 
 export default function Record() {
   const { title, lyrics, artists, url, coverPhoto, format } =
@@ -52,7 +53,6 @@ export default function Record() {
 
   const theme = useThemeColor({ light: "black", dark: "white" });
 
-
   const checkIfAvailable = async () => {
     try {
       const data = await AsyncStorage.getItem(`${title}`);
@@ -73,17 +73,20 @@ export default function Record() {
     try {
       const isAvailable = await checkIfAvailable();
       if (!isAvailable) {
-        const fileUri = `${FileSystem.documentDirectory}${title}.${format}`;
-        
+        const fileUri = `${FileSystem.cacheDirectory}${Date.now()}.${format}`;
+        console.log("File URI:", fileUri);
         const { uri } = await FileSystem.downloadAsync(url, fileUri);
-        await AsyncStorage.setItem(`${title}`, JSON.stringify(uri));
-        setSaveMusic(uri);
+        console.log(`Saved URI:`, uri);
+        if (uri) {
+          await AsyncStorage.setItem(`${title}`, JSON.stringify(uri));
+          setSaveMusic(uri);
+        }
       } else {
         return;
       }
     } catch (error) {
       console.log(error);
-      Toast.show(error.message, 3000);
+      Toast.show(error, 5000);
     }
   }
 
@@ -161,7 +164,7 @@ export default function Record() {
   //asking for permission to record audio
   const getAudioPermissions = async () => {
     try {
-      const { granted } = await permissionResponse;
+      const { granted } = permissionResponse;
       if (!granted) {
         await requestPermission();
       }
@@ -194,7 +197,6 @@ export default function Record() {
 
       recording.setOnRecordingStatusUpdate((status) => {
         if (status.isRecording) {
-          
         }
       });
     } catch (error) {
@@ -213,8 +215,8 @@ export default function Record() {
 
       if (uri) {
         const fileUri = `${
-          FileSystem.documentDirectory
-        }${title}recording_${Date.now()}.wav`;
+          FileSystem.cacheDirectory
+        }${Date.now()}_recording_.wav`;
         await FileSystem.moveAsync({ from: uri, to: fileUri });
         setVocals(fileUri);
         console.log("Vocals Saved at:", fileUri);
@@ -223,9 +225,9 @@ export default function Record() {
 
       if (uri) {
         const outPutFilePAth = `${
-          FileSystem.documentDirectory
-        }_trimmed_${title}${Date.now()}.${format}`;
-
+          FileSystem.cacheDirectory
+        }_trimmed_${Date.now()}.${format}`;
+        console.log(outPutFilePAth);
         const music = await AudioProcessor.trimAudio(
           saveMusic,
           outPutFilePAth,
@@ -237,10 +239,10 @@ export default function Record() {
           setLoading(false);
         }
       }
-
       setFinished(true);
     } catch (error) {
       console.log(error);
+      Toast.show(error.message, 3000);
       setLoading(false);
     }
   };
@@ -390,7 +392,11 @@ export default function Record() {
               borderWidth: StyleSheet.hairlineWidth,
               borderColor: "black",
               borderRadius: 60,
-              backgroundColor: !saveMusic ? "gray" : isRecording ? "red" : "lightgreen",
+              backgroundColor: !saveMusic
+                ? "gray"
+                : isRecording
+                ? "red"
+                : "lightgreen",
             }}
           >
             <Entypo name="modern-mic" size={50} color={"black"} />

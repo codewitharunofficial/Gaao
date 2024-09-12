@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "902634639407",
+    "project_id": "the-gaao-app",
+    "storage_bucket": "the-gaao-app.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:902634639407:android:a5a55d96739d5da27236da",
+        "android_client_info": {
+          "package_name": "com.codewitharun.gaao"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "902634639407-pjcslc5pu3814mkrbimk0avbo6n35o9a.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.codewitharun.gaao",
+            "certificate_hash": "14d098577f25d6b737c9f5568445fffddec06cd3"
+          }
+        },
+        {
+          "client_id": "902634639407-5b1n7ktr4uq38da1p68395vutj4b0ch8.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCTnY-gKCu1SIn3T9uIVycyFOsumnjcVfI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "902634639407-5b1n7ktr4uq38da1p68395vutj4b0ch8.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

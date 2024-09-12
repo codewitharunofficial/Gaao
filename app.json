@@ -29,7 +29,8 @@
         "WRITE_EXTERNAL_STORAGE",
         "READ_MEDIA_IMAGES",
         "READ_MEDIA_AUDIO",
-        "READ_EXTERNAL_STORAGE"
+        "READ_EXTERNAL_STORAGE",
+        "MANAGE_EXTERNAL_STORAGE"
       ],
       "package": "com.codewitharun.gaao"
     },
@@ -42,8 +43,7 @@
       "expo-router", 
       [
         "expo-av", {
-          "microphonePermission": "Allow Gaao to access your microphone.",
-          "modifyAudioPermission": "Allq Gaao to modify audio files"
+          "microphonePermission": "Allow Gaao to access your microphone."
         }
       ],
       [

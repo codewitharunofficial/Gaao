@@ -20,6 +20,7 @@ import { useRouter } from "expo-router";
 import { setNavigation } from "@/hooks/navigationRef";
 import * as WebBrowser from "expo-web-browser";
 import Toast from 'react-native-simple-toast';
+import { googleSignIn } from "@/constants/functions";
 WebBrowser.maybeCompleteAuthSession();
 
 const index = () => {
@@ -103,6 +104,7 @@ const index = () => {
         setIsSigningUp(false);
       } catch (error) {
         console.log(error.message);
+        Toast.show(error.message, 3000);
       }
   };
 
@@ -119,6 +121,7 @@ const index = () => {
       }
     } catch (error) {
       console.log(error);
+      Toast.show(error.message, 3000);
     }
   }
 
@@ -162,7 +165,8 @@ const index = () => {
         console.log("Something went wrong while getting data");
       }
     } catch (error) {
-      console.log(error)
+      console.log(error);
+      Toast.show(error.message, 3000);
     }
   }
 
@@ -197,6 +201,19 @@ useEffect(() => {
     // console.log(activeUser);
   }, []);
 
+  const handleSignIn = async () => {
+    try {
+      const userDetails = await googleSignIn();
+      if(userDetails){
+        console.log(userDetails);
+        logIn(userDetails.email);
+      }
+      Alert.alert(`Welcome! ${userDetails?.name}`);
+    } catch (error) {
+      Alert.alert("Error", error);
+    }
+  }
+
   return (
     <SafeAreaView style={{ width: "100%", height: "100%" }}>
       <ThemedView
@@ -221,7 +238,7 @@ useEffect(() => {
         />
 
         <TouchableOpacity
-          onPress={() => {promptAsync(); setIsSigningUp(true)}}
+          onPress={() => {promptAsync() ; setIsSigningUp(true)}}
           style={{
             width: "auto",
             height: "5%",
@@ -239,7 +256,8 @@ useEffect(() => {
           {/* </Link> */}
         </TouchableOpacity>
         <TouchableOpacity
-          onPress={() => {token && !isExpired ? loginIfToken(token) : promptAsync(); setLogginIn(true)}}
+          // onPress={() => {token && !isExpired ? loginIfToken(token) : promptAsync(); setLogginIn(true)}}
+          onPress={() => handleSignIn()}
           style={{
             width: "auto",
             height: "5%",

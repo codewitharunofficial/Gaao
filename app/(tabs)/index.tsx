@@ -1,64 +1,43 @@
-import { Image, StyleSheet, Platform, Button, TouchableOpacity, ScrollView, SafeAreaView, View, PermissionsAndroid, Linking, Alert } from 'react-native';
-import WelcomeScreen from '@/components/Welcome';
-import ParallaxScrollView from '@/components/ParallaxScrollView';
+import { Image, StyleSheet, ScrollView, SafeAreaView, View } from 'react-native';
 import { useContext, useEffect, useState } from 'react';
 import { ThemedView } from '@/components/ThemedView';
 import ShortcutStrips from '@/components/ShortcutStrips';
 import axios from 'axios'
 import TrackCard from '@/components/TrackCard';
 import { Auth } from '@/hooks/Context/User';
-import * as MediaLibrary from 'expo-media-library';
-import * as Updates from 'expo-updates';
-import { checkForUpdates } from '@/constants/updates';
 import LoadingScreen from '@/components/LoadingScreen';
 import { useUpdates } from 'expo-updates';
-import Toast from "react-native-simple-toast"
 import UpdatesModal from '@/components/Models/UpdatesModal';
-
+import ManageExternalStorage from "react-native-manage-external-storage";
 
 
 export default function HomeScreen() {
 
   const {user} = useContext(Auth);
-  // const [permissionResponse, requestPermission] = MediaLibrary.usePermissions();
-  const {currentlyRunning, isUpdateAvailable, isUpdatePending} = useUpdates();
-
+  const [result, setResult] = useState(false);
+  const {currentlyRunning, isUpdateAvailable} = useUpdates();
   const visible = isUpdateAvailable;
 
+
   useEffect(() => {
-    if(isUpdatePending){
-      Updates.reloadAsync();
-    }
-  },[isUpdatePending]);
+    async function AskPermission() {
+    await ManageExternalStorage.checkAndGrantPermission(
+           err => { 
+             setResult(false);
+             console.error(err);
+          },
+          res => {
+           setResult(true);
+           console.log(res);
+          },
+        )
+   }
+     if(!result){
+      AskPermission();
+     } 
+  }, [!result]);
 
 
-  async function askPermissions(){
-    try {
-      const {status} = await MediaLibrary.requestPermissionsAsync();
-      if(status !== 'granted'){
-        Alert.alert('Permissions Required!', "Gaao needs to access your media library to save files");
-        return false;
-      } else {
-        return true;
-      }
-    } catch (error) {
-      console.log(error);
-    }
-  }
-
-  async function getPermissions(){
-    const {status} = await MediaLibrary.getPermissionsAsync();
-    if(status === 'granted'){
-      Toast.show("Permssions Granted", 2000);
-      return true
-    } else {
-      Toast.show("Asking Permssions...!", 3000);
-      return askPermissions();
-    }
-  }
-
-  useEffect(() => {getPermissions()},[]);
-  // const [userType, setUserType] = useState("Old");
   const [tracks, setTracks] = useState([]);
 
   const getKaraokes = async () => {

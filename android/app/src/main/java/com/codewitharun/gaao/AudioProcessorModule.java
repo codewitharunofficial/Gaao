@@ -380,55 +380,47 @@ public class AudioProcessorModule extends ReactContextBaseJavaModule {
     }
 
     @ReactMethod
-    public void mixMusicAndVocals(String musicFilePath, String vocalFilePath, double musicVolume, double vocalVolume,
-            Promise promise) {
-        try {
+    public void mixMusicAndVocals(String musicFilePath, String vocalFilePath, double musicVolume, double vocalVolume, Promise promise) {
+    try {
+        // Define paths for temporary conversion of music and vocals to WAV
+        String musicWavFilePath = getCacheFilePath("converted_music_" + System.currentTimeMillis() + ".wav");
+        String vocalWavFilePath = getCacheFilePath("converted_vocals_" + System.currentTimeMillis() + ".wav");
+        String outputPath = getCacheFilePath("mixed_output_" + System.currentTimeMillis() + ".wav");
 
-            try {
-                String inputFilePath = URLDecoder.decode(musicFilePath, StandardCharsets.UTF_8.toString());
-                String vocalPath = URLDecoder.decode(vocalFilePath, StandardCharsets.UTF_8.toString());
-                String outputPath = getCacheFilePath("mixed_output_" + System.currentTimeMillis() + ".wav");
-
-                String convertMusicPath = getCacheFilePath("converted_music" + System.currentTimeMillis() + ".wav");
-
-                String convertMusicCommand = String.format("-i %s -acodec pcm_s16le -ar 44100 -ac 2 %s", inputFilePath,
-                        convertMusicPath);
-                        System.out.println(convertMusicCommand);
-
-                FFmpegSession convertSession = FFmpegKit.execute(convertMusicCommand);
-
-                if (ReturnCode.isSuccess(convertSession.getReturnCode())) {
-
-                    String ffmpegCommand = String.format(
-                            "-i %s -i %s -filter_complex \"[1:a]adelay=%d|%d,volume=%.2f[a1];[0:a]volume=%.2f[a0];[a0][a1]amix=inputs=2:duration=longest:dropout_transition=2\" %s",
-                            convertMusicPath,
-                            vocalPath,
-                            vocalVolume,
-                            musicVolume,
-                            outputPath);
-
-                    FFmpegSession session = FFmpegKit.execute(ffmpegCommand);
-
-                    if (ReturnCode.isSuccess(session.getReturnCode())) {
-                        promise.resolve(outputPath);
-                    } else {
-                        promise.reject("MIXING_ERROR", "Error mixing music and vocals: " + session.getOutput());
-                    }
-                } else {
-                    promise.reject("Conversion_Error",
-                            "Error While Converting mp3 to Wav" + convertSession.getOutput());
-                }
-
-            } catch (UnsupportedEncodingException e) {
-                promise.reject("URI Decoding Error", "Error While Decoding URI");
-                throw new Error(e);
-            }
-
-        } catch (Exception e) {
-            promise.reject("MIXING_ERROR", "Exception during mixing", e);
-            throw new Error(e);
+        // Convert music (MP3) to WAV
+        String ffmpegCommandConvertMusic = String.format("-i %s %s", musicFilePath, musicWavFilePath);
+        FFmpegSession sessionMusic = FFmpegKit.execute(ffmpegCommandConvertMusic);
+        if (!ReturnCode.isSuccess(sessionMusic.getReturnCode())) {
+            promise.reject("CONVERSION_ERROR", "Failed to convert music to WAV: " + sessionMusic.getOutput());
+            return;
         }
+
+        // Convert vocals (WAV) to WAV (in case they are not in the desired format or bit rate)
+        String ffmpegCommandConvertVocals = String.format("-i %s %s", vocalFilePath, vocalWavFilePath);
+        FFmpegSession sessionVocals = FFmpegKit.execute(ffmpegCommandConvertVocals);
+        if (!ReturnCode.isSuccess(sessionVocals.getReturnCode())) {
+            promise.reject("CONVERSION_ERROR", "Failed to convert vocals to WAV: " + sessionVocals.getOutput());
+            return;
+        }
+
+        // Now mix the converted WAV files with different volumes
+        String ffmpegCommandMix = String.format(
+            "-i %s -i %s -filter_complex \"[0:a]volume=%.2f[a0];[1:a]volume=%.2f[a1];[a0][a1]amix=inputs=2:duration=first:dropout_transition=2\" -c:a pcm_s16le %s",
+            musicWavFilePath, vocalWavFilePath, musicVolume, vocalVolume, outputPath);
+
+        FFmpegSession sessionMix = FFmpegKit.execute(ffmpegCommandMix);
+
+        // Check if mixing was successful
+        if (ReturnCode.isSuccess(sessionMix.getReturnCode())) {
+            promise.resolve(outputPath);
+        } else {
+            promise.reject("MIXING_ERROR", "Error mixing music and vocals: " + sessionMix.getOutput());
+        }
+    } catch (Exception e) {
+        promise.reject("MIXING_ERROR", "Exception during mixing", e);
     }
+}
+
 
     @ReactMethod
     public void applyMasteringPreset(String inputFilePath, String outputFilePath, String presetName, Promise promise) {
@@ -453,12 +445,9 @@ public class AudioProcessorModule extends ReactContextBaseJavaModule {
 
     @ReactMethod
     public void trimAudio(String inputFilePath, String outputFilePath, int startMs, int endMs, Promise promise) {
-        try {
             try {
-                String inputPath = URLDecoder.decode(inputFilePath, StandardCharsets.UTF_8.toString());
-                String outputPath = URLDecoder.decode(outputFilePath, StandardCharsets.UTF_8.toString());
-                String cmd = String.format("-i %s -ss %d -to %d -c copy %s", inputPath, startMs / 1000, endMs / 1000,
-                        outputPath);
+                String cmd = String.format("-i %s -ss %d -to %d -c copy %s", inputFilePath, startMs / 1000, endMs / 1000,
+                outputFilePath);
 
                 FFmpegSession session = FFmpegKit.execute(cmd);
 
@@ -468,10 +457,6 @@ public class AudioProcessorModule extends ReactContextBaseJavaModule {
 
                     promise.reject("FFmpeg Error", "Trimming failed: " + session.getOutput());
                 }
-            } catch (UnsupportedEncodingException e) {
-                promise.reject("URI Decoding Error", "Error While Decoding URI");
-            }
-
         } catch (Exception e) {
             promise.reject("Error While Trimming Audio:", e);
         }
