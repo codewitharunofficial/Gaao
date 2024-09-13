@@ -44,7 +44,7 @@ const VocalSlider = ({ url, title, isVocalPlaying, setIsVocalPlaying, vocalsVolu
           flexDirection: "row",
           alignItems: "center",
           justifyContent: "center",
-          gap: 10,
+          gap: 3,
         }}
       >
         <View
@@ -84,10 +84,10 @@ const VocalSlider = ({ url, title, isVocalPlaying, setIsVocalPlaying, vocalsVolu
               setVocalsVolume(value)
             }}
             style={{
-              width: "100%",
+              width: "95%",
               height: "20%",
               position: "absolute",
-              bottom: "40%",
+              bottom: "35%",
               borderColor: "blue",
             }}
           />

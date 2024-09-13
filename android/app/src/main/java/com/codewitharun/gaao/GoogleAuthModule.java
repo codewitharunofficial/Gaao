@@ -32,7 +32,7 @@ public class GoogleAuthModule extends ReactContextBaseJavaModule implements Acti
         // Configure Google Sign-In
         GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
                 .requestEmail()
-                .requestIdToken("902634639407-pjcslc5pu3814mkrbimk0avbo6n35o9a.apps.googleusercontent.com")  // Replace with your client ID
+                .requestIdToken("902634639407-5b1n7ktr4uq38da1p68395vutj4b0ch8.apps.googleusercontent.com")  // Replace with your client ID
                 .build();
         googleSignInClient = GoogleSignIn.getClient(reactContext, gso);
     }

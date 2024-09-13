@@ -1,6 +1,4 @@
 import {
-  BackHandler,
-  Button,
   Dimensions,
   Image,
   SafeAreaView,
@@ -9,20 +7,15 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import React, { useContext, useEffect, useRef, useState } from "react";
-import { Link, useLocalSearchParams } from "expo-router";
+import React, { useContext, useEffect, useState } from "react";
+import { useLocalSearchParams } from "expo-router";
 import { ThemedView } from "@/components/ThemedView";
 import { ThemedText } from "@/components/ThemedText";
-import MaterialIcons from "@expo/vector-icons/MaterialIcons";
-import Feather from "@expo/vector-icons/Feather";
 import VocalSlider from "@/components/VocalSlider";
 import MusicSlider from "@/components/MusicSlider";
-import Ionicons from "@expo/vector-icons/Ionicons";
 import { Audio } from "expo-av";
 import { NativeModules } from "react-native";
-import ReverbOptions from "@/components/ReverbOptions";
 import { RecordedTrack } from "@/hooks/Context/Recording";
-import { BottomModal, ModalContent } from "react-native-modals";
 import { useThemeColor } from "@/hooks/useThemeColor";
 import ReverbModel from "@/components/Models/ReverbModel";
 import CompressorModal from "@/components/Models/CompressorModel";
@@ -30,12 +23,13 @@ import EqualizerModel from "@/components/Models/EqualizerModel";
 import { PlayerControls } from "@/hooks/Context/Player";
 import { EfxControls } from "@/hooks/Context/ProcessedAudio";
 import SyncModal from "@/components/Models/SyncModal";
-import { TrackControls } from "@/hooks/Context/Karaoke";
 import { VocalControls } from "@/hooks/Context/Vocals";
 import { useMusic } from "@/hooks/Context/Music";
 import { handleTrackVolume } from "@/constants/effects";
 import { pauseTrack, resumeTrack } from "@/constants/playerNodes";
 import * as Sentry from '@sentry/react-native';
+import MixedTrack from "@/components/MixedTrack";
+import AntDesign from "@expo/vector-icons/AntDesign";
 
 const PreviewScreen = () => {
   const { AudioProcessor } = NativeModules;
@@ -63,7 +57,11 @@ const PreviewScreen = () => {
   const [isMusicPlaying, setIsMusicPlaying] = useState(false);
   const [isVocalPlaying, setIsVocalPlaying] = useState(false);
   const [vocalsVolume, setVocalsVolume] = useState(1.0);
+  const [mixTrackVolume, setMixTrackVolume] = useState(1.0);
+  const [mixedTrackPos, setMixedTrackPos] = useState(0);
+  const [currentMixed, setCurrentMixed] = useState(null);
   const [mix, setMix] = useState(null);
+  const [isMixing, setIsMixing] = useState(false);
 
   const loadAndPlaySound = async (sound, filePath, volume) => {
     try {
@@ -226,10 +224,12 @@ const PreviewScreen = () => {
       if (result) {
         console.log("Mixing results:", result);
         setMix(result);
-        const { musicSound: sound } = Audio.Sound.createAsync(
+        setIsMixing(true);
+        const { sound: mixedSound } = await Audio.Sound.createAsync(
           { uri: result },
           { shouldPlay: false }
         );
+       setCurrentMixed(mixedSound);
       }
     } catch (error) {
       Sentry.captureException(error);
@@ -257,9 +257,10 @@ const PreviewScreen = () => {
             alignItems: "center",
             justifyContent: "space-between",
             padding: 10,
+            gap: 10
           }}
-        >
-          <MusicSlider
+        >  
+              <MusicSlider
             url={music}
             title={title}
             isMusicPlaying={isMusicPlaying}
@@ -340,6 +341,22 @@ const PreviewScreen = () => {
               title={title}
             />
           )}
+          {isMixing && (
+            <MixedTrack title={title} url={mix} isMusicPlaying={isMusicPlaying} setIsMusicPlaying={setIsMusicPlaying} trackVolume={mixTrackVolume} setTrackVolume={setMixTrackVolume} pauseTrack={() => {
+              pauseTrack(currentMixed);
+              setIsMusicPlaying(false);
+              currentMixed.setOnPlaybackStatusUpdate((status) => {
+              setMixedTrackPos(status.positionMillis);
+            });
+            }} resumeTrack={() => {
+              resumeTrack(currentMixed, mixedTrackPos);
+              setIsMusicPlaying(true);
+            }}
+            isMixing={isMixing}
+            setIsMixing={setIsMixing}
+            modalColor={modalColor}
+            />
+          )}
         </View>
         <TouchableOpacity
           onPress={() => {
@@ -347,8 +364,9 @@ const PreviewScreen = () => {
             setIsProcessing(false);
             setProcessedVocals(vocals);
           }}
-          style={{width: 'auto', height: '5%', backgroundColor: 'red', padding: 5, alignItems: 'center', justifyContent: 'center'}}
+          style={{width: 'auto', height: '5%', backgroundColor: 'red', padding: 8, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 10, marginTop: 10}}
         >
+          <AntDesign name="delete" size={20} color={"white"} />
           <Text style={{fontSize: 16, fontWeight: '400', color: '#ffffff'}} >Discard-Changes</Text>
         </TouchableOpacity>
         <View
@@ -358,7 +376,7 @@ const PreviewScreen = () => {
             padding: 10,
             flexDirection: "row",
             flexWrap: "wrap",
-            gap: 5,
+            gap: 10,
           }}
         >
           {efx &&
@@ -372,7 +390,6 @@ const PreviewScreen = () => {
                   height: "10%",
                   alignItems: "center",
                   justifyContent: "space-evenly",
-                  // gap: 5,
                   borderRadius: 10,
                 }}
                 onPress={() => e.onPress()}

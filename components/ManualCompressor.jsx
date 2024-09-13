@@ -40,7 +40,7 @@ const ManualCompressor = ({ onApplyCompressor, vocals, title }) => {
                 minimumValue={0}
                 maximumValue={100}
                 value={ratio}
-                onValueChange={value => {setRatio(value); setApplyEfx(true)}}
+                onSlidingComplete={value => {setRatio(value); setApplyEfx(true)}}
                 minimumTrackTintColor="#1fb28a"
                 maximumTrackTintColor="#d3d3d3"
                 thumbTintColor="#b9e4c9"
@@ -51,7 +51,7 @@ const ManualCompressor = ({ onApplyCompressor, vocals, title }) => {
                 minimumValue={0}
                 maximumValue={100}
                 value={threshold}
-                onValueChange={value => {setThreshold(value); setApplyEfx(true)}}
+                onSlidingComplete={value => {setThreshold(value); setApplyEfx(true)}}
                 minimumTrackTintColor="#1fb28a"
                 maximumTrackTintColor="#d3d3d3"
                 thumbTintColor="#b9e4c9"
@@ -62,7 +62,7 @@ const ManualCompressor = ({ onApplyCompressor, vocals, title }) => {
                 minimumValue={100}
                 maximumValue={1000}
                 value={attack}
-                onValueChange={value => {setAttack(value); setApplyEfx(true)}}
+                onSlidingComplete={value => {setAttack(value); setApplyEfx(true)}}
                 minimumTrackTintColor="#1fb28a"
                 maximumTrackTintColor="#d3d3d3"
                 thumbTintColor="#b9e4c9"
@@ -73,7 +73,7 @@ const ManualCompressor = ({ onApplyCompressor, vocals, title }) => {
                 minimumValue={100}
                 maximumValue={1000}
                 value={release}
-                onValueChange={value => {setRelease(value); setApplyEfx(true)}}
+                onSlidingComplete={value => {setRelease(value); setApplyEfx(true)}}
                 minimumTrackTintColor="#1fb28a"
                 maximumTrackTintColor="#d3d3d3"
                 thumbTintColor="#b9e4c9"
@@ -84,7 +84,7 @@ const ManualCompressor = ({ onApplyCompressor, vocals, title }) => {
                 minimumValue={0}
                 maximumValue={100}
                 value={makeupGain}
-                onValueChange={value => {setMakeUpGain(value); setApplyEfx(true)}}
+                onSlidingComplete={value => {setMakeUpGain(value); setApplyEfx(true)}}
                 minimumTrackTintColor="#1fb28a"
                 maximumTrackTintColor="#d3d3d3"
                 thumbTintColor="#b9e4c9"

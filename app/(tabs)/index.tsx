@@ -35,7 +35,7 @@ export default function HomeScreen() {
      if(!result){
       AskPermission();
      } 
-  }, [!result]);
+  }, [result]);
 
 
   const [tracks, setTracks] = useState([]);

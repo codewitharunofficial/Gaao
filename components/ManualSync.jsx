@@ -6,6 +6,7 @@ import { EfxControls } from "@/hooks/Context/ProcessedAudio";
 
 const ManualSync = ({ onApplySync, vocals, title, setSync }) => {
   const [delay, setDelay] = useState(0);
+  const [currentDelayValue, setCurrentDelayValue] = useState(0);
   const [applyManualFx, setApplyManualFx] = useState(false);
   const { isProcessing, setIsProcessing } = useContext(EfxControls);
   const [applyEfx, setApplyEfx] = useState(false);
@@ -41,14 +42,18 @@ const ManualSync = ({ onApplySync, vocals, title, setSync }) => {
         minimumValue={-1}
         maximumValue={1}
         value={delay}
-        onValueChange={(value) => {
+        onSlidingComplete={(value) => {
           setDelay(value);
           setApplyManualFx(true);
+        }}
+        onValueChange={(value) => {
+          setCurrentDelayValue(value);
         }}
         minimumTrackTintColor="#1fb28a"
         maximumTrackTintColor="#d3d3d3"
         thumbTintColor="#b9e4c9"
       />
+      <Text>{currentDelayValue}s</Text>
       <TouchableOpacity onPress={() => {efxList.push(efx); setApplyEfx(false); setIsProcessing(true); setSync(false)}} style={{width: '20%', height: '10%', backgroundColor: 'green', position: 'absolute', bottom: 10, right: 5, borderRadius: 10, alignItems: 'center', justifyContent: 'center'}} >
          <Text style={{fontSize: 12, fontWeight: 'bold', color: 'black'}} >Apply-Changes</Text>
      </TouchableOpacity>
@@ -69,7 +74,7 @@ const styles = StyleSheet.create({
     marginVertical: 5,
   },
   slider: {
-    width: "100%",
+    width: "90%",
     height: 40,
   },
 });

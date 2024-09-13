@@ -36,7 +36,7 @@ const ManualEqualizer = ({ onApplyEqualizer, vocals, title }) => {
                 minimumValue={0}
                 maximumValue={100}
                 value={bassGain}
-                onValueChange={value => {setBassGain(value); setApplyEfx(true)}}
+                onSlidingComplete={value => {setBassGain(value); setApplyEfx(true)}}
                 minimumTrackTintColor="#1fb28a"
                 maximumTrackTintColor="#d3d3d3"
                 thumbTintColor="#b9e4c9"
@@ -47,7 +47,7 @@ const ManualEqualizer = ({ onApplyEqualizer, vocals, title }) => {
                 minimumValue={0}
                 maximumValue={100}
                 value={midGain}
-                onValueChange={value => {setMidGain(value); setApplyEfx(true)}}
+                onSlidingComplete={value => {setMidGain(value); setApplyEfx(true)}}
                 minimumTrackTintColor="#1fb28a"
                 maximumTrackTintColor="#d3d3d3"
                 thumbTintColor="#b9e4c9"
@@ -58,7 +58,7 @@ const ManualEqualizer = ({ onApplyEqualizer, vocals, title }) => {
                 minimumValue={0}
                 maximumValue={100}
                 value={treble}
-                onValueChange={value => {setTreble(value); setApplyEfx(true)}}
+                onSlidingComplete={value => {setTreble(value); setApplyEfx(true)}}
                 minimumTrackTintColor="#1fb28a"
                 maximumTrackTintColor="#d3d3d3"
                 thumbTintColor="#b9e4c9"

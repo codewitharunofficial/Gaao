@@ -210,7 +210,7 @@ export default function TabTwoScreen() {
                 router.push("/screens/Auth");
               }}
               style={{
-                width: "30%",
+                width: "auto",
                 height: "8%",
                 flexDirection: "row",
                 alignItems: "center",
@@ -219,9 +219,10 @@ export default function TabTwoScreen() {
                 borderRadius: 10,
                 justifyContent: "center",
                 alignSelf: "center",
+                padding: 10
               }}
             >
-              <Text style={{ fontSize: 20, color: themedText }}>Log-Out</Text>
+              <Text style={{ fontSize: 18, color: themedText }}>Log-Out</Text>
               <Ionicons name="exit" size={20} color={"black"} />
             </TouchableOpacity>
           ) : (

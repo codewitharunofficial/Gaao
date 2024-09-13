@@ -49,7 +49,7 @@ const MusicSlider = ({ title, url, isMusicPlaying, setIsMusicPlaying, trackVolum
           borderRadius: 10,
           flexDirection: "row",
           alignItems: "center",
-          gap: 10,
+          gap: 5,
           justifyContent: "center",
         }}
       >
@@ -89,10 +89,10 @@ const MusicSlider = ({ title, url, isMusicPlaying, setIsMusicPlaying, trackVolum
               setTrackVolume(value);
             }}
             style={{
-              width: "100%",
+              width: "95%",
               height: "20%",
               position: "absolute",
-              bottom: "40%",
+              bottom: "35%",
               borderColor: "blue",
             }}
           />
