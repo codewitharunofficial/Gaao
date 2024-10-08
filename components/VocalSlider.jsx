@@ -52,11 +52,26 @@ const VocalSlider = ({ url, title, isVocalPlaying, setIsVocalPlaying, vocalsVolu
             width: "20%",
             height: "100%",
             backgroundColor: "orange",
+            flexDirection: 'column',
             alignItems: "center",
             justifyContent: "center",
+            gap: 5
           }}
         >
-          <MaterialIcons name="multitrack-audio" size={30} color={"black"} />
+          <MaterialIcons name="multitrack-audio" size={40} color={"black"} />
+          <Slider
+            value={vocalsVolume}
+            maximumValue={1}
+            minimumValue={0}
+            onValueChange={(value) => {
+              setVocalsVolume(value)
+            }}
+            style={{
+              width: "95%",
+              height: "20%",
+              borderColor: "blue",
+            }}
+          />
         </View>
         {isVocalPlaying ? (
           <Ionicons
@@ -74,23 +89,8 @@ const VocalSlider = ({ url, title, isVocalPlaying, setIsVocalPlaying, vocalsVolu
             color={"black"}
           />
         )}
-        <View style={{ width: "70%", height: "75%", alignItems: "center" }}>
+        <View style={{ width: "70%", height: "75%", alignItems: "center", justifyContent: 'center' }}>
           <WaveForm uri={url} setVocalsWave={setVocalsWave} />
-          <Slider
-            value={vocalsVolume}
-            maximumValue={1}
-            minimumValue={0}
-            onValueChange={(value) => {
-              setVocalsVolume(value)
-            }}
-            style={{
-              width: "95%",
-              height: "20%",
-              position: "absolute",
-              bottom: "35%",
-              borderColor: "blue",
-            }}
-          />
         </View>
       </View>
     </View>

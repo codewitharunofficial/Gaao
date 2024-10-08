@@ -38,7 +38,7 @@ const PreviewScreen = () => {
 
   const { height } = Dimensions.get("window");
   const theme = useThemeColor({ light: "lightblue", dark: "#000" });
-  const modalColor = useThemeColor({ light: "yellow", dark: "lightblue" });
+  const modalColor = useThemeColor({ light: "#F72585", dark: "lightblue" });
   const [applyReverb, setApplyReverb] = useState(false);
   const [applyCompressor, setApplyCompressor] = useState(false);
   const [sync, setSync] = useState(false);
@@ -62,6 +62,8 @@ const PreviewScreen = () => {
   const [currentMixed, setCurrentMixed] = useState(null);
   const [mix, setMix] = useState(null);
   const [isMixing, setIsMixing] = useState(false);
+
+  const themedBg = useThemeColor({light: "#8E2DE2", dark: "#000"})
 
   const loadAndPlaySound = async (sound, filePath, volume) => {
     try {
@@ -178,36 +180,42 @@ const PreviewScreen = () => {
       title: "Reverb",
       onPress: () => setApplyReverb(!applyReverb),
       image: require("@/assets/images/reverb.png"),
+      disabled: vocals ? false : true,
     },
     {
       id: 1,
       title: "Compressor",
       onPress: () => setApplyCompressor(!applyCompressor),
       image: require("@/assets/images/compressor.png"),
+      disabled: vocals || processedVocals ? false : true,
     },
     {
       id: 2,
       title: "Syncronize",
       onPress: () => setSync(!sync),
       image: require("@/assets/images/sync.jpg"),
+      disabled: vocals ? false : true,
     },
     {
       id: 3,
       title: "Equalizer",
       onPress: () => setApplyEQ(!applyEQ),
       image: require("@/assets/images/equalizer.jpg"),
+      disabled: vocals ? false : true,
     },
     {
       id: 4,
       title: "Mix-Tracks",
       onPress: () => handleMix(music, processedVocals ? processedVocals : vocals, trackVolume, vocalsVolume),
       image: require("@/assets/images/mix.jpg"),
+      disabled: vocals ? false : true,
     },
     {
       id: 4,
       title: "Master-Track",
       onPress: () => masterTrack(),
       image: require("@/assets/images/mastering.jpg"),
+      disabled: mix ? false : true,
     },
   ];
 
@@ -238,13 +246,14 @@ const PreviewScreen = () => {
   };
 
   return (
-    <SafeAreaView style={{ width: "100%", height: "100%" }}>
+    <SafeAreaView style={{ width: "100%", height: "100%", paddingTop: "5%"}}>
       <ThemedView
         style={{
           width: "100%",
           height: "100%",
           flexDirection: "column",
           alignItems: "center",
+          backgroundColor: themedBg
         }}
       >
         <View
@@ -364,7 +373,7 @@ const PreviewScreen = () => {
             setIsProcessing(false);
             setProcessedVocals(vocals);
           }}
-          style={{width: 'auto', height: '5%', backgroundColor: 'red', padding: 8, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 10, marginTop: 10}}
+          style={{width: 'auto', height: '5%', backgroundColor: 'red', padding: 8, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 10, marginTop: 10, borderRadius: 10}}
         >
           <AntDesign name="delete" size={20} color={"white"} />
           <Text style={{fontSize: 16, fontWeight: '400', color: '#ffffff'}} >Discard-Changes</Text>
@@ -392,6 +401,7 @@ const PreviewScreen = () => {
                   justifyContent: "space-evenly",
                   borderRadius: 10,
                 }}
+                disabled={e.disabled}
                 onPress={() => e.onPress()}
               >
                 <Image

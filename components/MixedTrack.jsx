@@ -16,26 +16,6 @@ const MixedTrack = ({ title, url, isMusicPlaying, setIsMusicPlaying, trackVolume
   const { setMusicWave } = useContext(Visualizer);
   const [isDownloading, setIsDownloading] = useState(false);
 
-const getStoragePermission = async () => {
-  try {
-    const {granted} = await MediaLibrary.getPermissionsAsync();
-    if(!granted){
-      const {granted} = await MediaLibrary.requestPermissionsAsync();
-      if(granted){
-        Toast.show("Permission Given");
-      } else {
-        Toast.show("Storage Permissions are Required!!");
-        await MediaLibrary.requestPermissionsAsync();
-      }
-    } 
-  } catch (error) {
-    console.log(error)
-  }
-}
-
-useEffect(() => {
-  getStoragePermission();
-});
   
 const saveToDevice = async () => {
   try {

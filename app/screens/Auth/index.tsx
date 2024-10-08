@@ -13,10 +13,8 @@ import axios from "axios";
 import { Auth } from "@/hooks/Context/User";
 import { useRouter } from "expo-router";
 import { setNavigation } from "@/hooks/navigationRef";
-import * as WebBrowser from "expo-web-browser";
 import Toast from "react-native-simple-toast";
 import { googleSignIn } from "@/constants/functions";
-WebBrowser.maybeCompleteAuthSession();
 
 const index = () => {
   const { user, setUser } = useContext(Auth);

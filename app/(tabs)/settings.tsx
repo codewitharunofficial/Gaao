@@ -30,9 +30,11 @@ export default function TabTwoScreen() {
   const themeIcon = useThemeColor({ light: "lightgray", dark: "white" });
   const themeBack = useThemeColor({ light: "#000", dark: "#fff" });
   const themedText = useThemeColor({ light: "black", dark: "white" });
+  const themedBg = useThemeColor({light: "#F3F4F6", dark: "#0B090A"});
+
   const backgroundBtn = useThemeColor({
     light: "lightgreen",
-    dark: "lightblue",
+    dark: "coral",
   });
 
   const [user, setUser] = useState({});
@@ -73,6 +75,7 @@ export default function TabTwoScreen() {
           flexDirection: "column",
           padding: "5%",
           gap: 20,
+          backgroundColor: themedBg
         }}
       >
         <ThemedText style={{ fontSize: 24, fontWeight: "bold" }}>
@@ -84,6 +87,7 @@ export default function TabTwoScreen() {
             height: "30%",
             alignItems: "center",
             justifyContent: "center",
+            backgroundColor: themedBg
           }}
         >
           {user && user?.profilePic ? (
@@ -91,7 +95,7 @@ export default function TabTwoScreen() {
               style={{
                 width: "auto",
                 height: "auto",
-                borderWidth: StyleSheet.hairlineWidth,
+                // borderWidth: StyleSheet.hairlineWidth,
                 borderRadius: 60,
                 borderColor: themeBack,
               }}
@@ -128,16 +132,10 @@ export default function TabTwoScreen() {
               }}
             >
               <ThemedText
-                style={{ color: themedText, marginTop: 10, fontSize: 20 }}
+                style={{ color: themedText, marginTop: 10, fontSize: 20, fontWeight: "400", fontFamily: "" }}
               >
                 {user?.name}
               </ThemedText>
-              <AntDesign
-                name="edit"
-                size={15}
-                color={"blue"}
-                style={{ marginTop: 10 }}
-              />
             </View>
           ) : null}
         </ThemedView>
@@ -148,7 +146,7 @@ export default function TabTwoScreen() {
             flexDirection: "row",
             alignItems: "center",
             gap: 10,
-            backgroundColor: "lightblue",
+            backgroundColor: "#4CC9F0",
             borderRadius: 10,
             justifyContent: "space-evenly",
           }}
@@ -230,7 +228,7 @@ export default function TabTwoScreen() {
               onPress={() => router.push("/screens/Auth")}
               style={{
                 width: "auto",
-                height: "8%",
+                height: "auto",
                 flexDirection: "row",
                 alignItems: "center",
                 gap: 10,
@@ -238,7 +236,7 @@ export default function TabTwoScreen() {
                 borderRadius: 10,
                 justifyContent: "center",
                 alignSelf: "center",
-                padding: 10,
+                padding: 15,
               }}
             >
               <Text style={{ fontSize: 20, color: themedText }}>

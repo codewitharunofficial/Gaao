@@ -7,30 +7,30 @@ import {
   ScrollView,
   Text,
   TouchableOpacity,
-  Platform,
-  PermissionsAndroid,
-  Linking,
-  Alert,
 } from "react-native";
 import { Link, useLocalSearchParams } from "expo-router";
 import SimpleLineIcons from "@expo/vector-icons/SimpleLineIcons";
-import Entypo from "@expo/vector-icons/Entypo";
+import FontAwesome5 from "@expo/vector-icons/FontAwesome5";
 import { useContext, useEffect, useState } from "react";
 import { Audio } from "expo-av";
 import { TrackControls } from "@/hooks/Context/Karaoke";
 import { RecordedTrack } from "@/hooks/Context/Recording";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import * as FileSystem from "expo-file-system";
-import * as MediaLibrary from "expo-media-library";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useThemeColor } from "@/hooks/useThemeColor";
 import { NativeModules } from "react-native";
 import LoadingScreen from "@/components/LoadingScreen";
 import Toast from "react-native-simple-toast";
+import * as MediaLibrary from "expo-media-library";
+import * as Sentry from "@sentry/react-native";
+import RNFS from 'react-native-fs';
+// import { NativeModules } from "expo-modules-core";
 
 export default function Record() {
   const { title, lyrics, artists, url, coverPhoto, format } =
     useLocalSearchParams();
+    const {StoragePermissionModule} = NativeModules;
 
   const [fullScreen, setFullScreen] = useState(false);
   const [saveMusic, setSaveMusic] = useState();
@@ -50,8 +50,41 @@ export default function Record() {
   const [recordedMusic, setRecordedMusic] = useState();
   const { AudioProcessor } = NativeModules;
   const [loading, setLoading] = useState(false);
+  const [isPemrission, setIsPermission] = useState(false);
 
-  const theme = useThemeColor({ light: "black", dark: "white" });
+  const theme = useThemeColor({ light: "white", dark: "white" });
+  const themedBg = useThemeColor({ light: "#8E2DE2", dark: "#000" });
+  const buttonColorIn = useThemeColor({ dark: "#E9C46A", light: "#F4A261" });
+
+
+  // async function askPermission(){
+  //   try {
+  //     const hasPermission = await StoragePermissionModule.checkStoragePermission();
+  //     console.log( "Permissions:", hasPermission);
+  //     if(!hasPermission){
+  //       const perm = await StoragePermissionModule.requestStoragePermission();
+  //       console.log("Asked Permissions", perm);
+  //       if(perm){
+  //         Toast.show("Permissions Approved", 3000);
+  //         return true
+  //       } else {
+  //         Toast.show("Please Give Storage Permissions", 2000);
+  //         return false;
+  //       }
+  //     } else {
+  //       Toast.show("Permissions Given Already", 3000);
+  //       return true;
+  //     }
+  //   } catch (error) {
+  //     console.error(error);
+  //   }
+  // } 
+
+  // useEffect(() => {
+  //   // getPermission();
+  //   //askPermission();
+  //   Toast.show(`File is in ${format}`, 3000);
+  // }, []);
 
   const checkIfAvailable = async () => {
     try {
@@ -66,32 +99,66 @@ export default function Record() {
       }
     } catch (error) {
       console.log(error);
+      Toast.show(error.message, 2000);
+      Sentry.captureException(error);
     }
   };
 
+  // const options = {};
+
   async function downloadMusic() {
     try {
-      const isAvailable = await checkIfAvailable();
-      if (!isAvailable) {
-        const fileUri = `${FileSystem.cacheDirectory}${Date.now()}.${format}`;
-        console.log("File URI:", fileUri);
-        const { uri } = await FileSystem.downloadAsync(url, fileUri);
-        console.log(`Saved URI:`, uri);
-        if (uri) {
-          await AsyncStorage.setItem(`${title}`, JSON.stringify(uri));
-          setSaveMusic(uri);
-        }
-      } else {
-        return;
-      }
+     const musicUrl = url;
+     const filePath = `${RNFS.CachesDirectoryPath}_audio_${Date.now()}`;
+     
+     const result = await RNFS.downloadFile({fromUrl: url, toFile: filePath}).promise;
+     console.log("File Saved At: ", filePath);
+     console.log(result.statusCode);
+     if(result.statusCode === 200){
+       Toast.show(`File Saved at: ${filePath}`, 2000);
+       setSaveMusic(filePath);
+     } else {
+      Toast.show("Error Downloading the track...!", 2000);
+     }
     } catch (error) {
-      console.log(error);
-      Toast.show(error, 5000);
+     console.log(error);
+     Toast.show(error.message, 2000);
     }
   }
 
+  // async function downloadMusic() {
+  //   try {
+  //     const isAvailable = await checkIfAvailable();
+  //     if (!isAvailable) {
+  //       const fileUri = `${FileSystem.documentDirectory}_${Date.now()}.${format}`;
+  //       console.log("File URI:", fileUri);
+  //       const { uri } = await FileSystem.downloadAsync(url, fileUri, {
+  //         headers: {
+  //           Authorization: "Bearer token",
+  //         },
+  //         md5: true,
+  //         cache: true,
+  //       });
+  //       console.log(`Saved URI:`, uri);
+  //       if (uri) {
+  //         await AsyncStorage.setItem(`${title}`, JSON.stringify(uri));
+  //         setSaveMusic(uri);
+  //       } else {
+  //         Toast.show("Download Failed", 2000);
+  //       }
+  //     } else {
+  //       return;
+  //     }
+  //   } catch (error) {
+  //     console.log(error);
+  //     Toast.show(error.message, 2000);
+  //     Sentry.captureException(error);
+  //   }
+  // }
+
   async function loadMusic() {
     try {
+      Toast.show("Loading the Song...!", 2000);
       const { sound, status } = await Audio.Sound.createAsync(
         { uri: saveMusic },
         { shouldPlay: false }
@@ -103,6 +170,7 @@ export default function Record() {
       setIsLoaded(true);
     } catch (error) {
       console.log(error);
+      Toast.show(error.message, 3000);
     }
   }
 
@@ -164,8 +232,8 @@ export default function Record() {
   //asking for permission to record audio
   const getAudioPermissions = async () => {
     try {
-      const { granted } = permissionResponse;
-      if (!granted) {
+      const status = permissionResponse?.status;
+      if (status !== 'granted') {
         await requestPermission();
       }
     } catch (error) {
@@ -256,7 +324,7 @@ export default function Record() {
   // }, [])
 
   return (
-    <SafeAreaView style={{ width: "100%", height: "100%" }}>
+    <SafeAreaView style={{ width: "100%", height: "100%", paddingTop: "5%" }}>
       <View
         style={{
           width: "100%",
@@ -264,6 +332,7 @@ export default function Record() {
           flexDirection: "column",
           alignItems: "center",
           gap: 5,
+          backgroundColor: themedBg,
         }}
       >
         <View
@@ -288,10 +357,11 @@ export default function Record() {
         </View>
         <ScrollView
           scrollEnabled
+          showsVerticalScrollIndicator={false}
           style={{
             width: "90%",
-            height: "40%",
-            backgroundColor: "lightblue",
+            height: "30%",
+            backgroundColor: "#4CC9F0",
             borderTopLeftRadius: 10,
             borderTopRightRadius: 10,
             padding: 20,
@@ -339,7 +409,7 @@ export default function Record() {
                 justifyContent: "center",
               }}
             >
-              <Ionicons name="pause" size={40} color={theme} />
+              <Ionicons name="pause" size={40} color={buttonColorIn} />
               <Text style={{ color: theme }}>Pause</Text>
             </TouchableOpacity>
           ) : finished ? (
@@ -347,8 +417,8 @@ export default function Record() {
               onPress={async () => {
                 setFinished(false);
                 await currentSound.stopAsync();
-                await recordedTrack.stopAndUnloadAsync();
-                setRecordedTrack();
+                setRecordedTrack(null);
+                // setRecordedTrack();
               }}
               style={{
                 width: "30%",
@@ -358,7 +428,11 @@ export default function Record() {
                 justifyContent: "center",
               }}
             >
-              <Ionicons name="reload-circle-outline" size={40} color={theme} />
+              <Ionicons
+                name="reload-circle-outline"
+                size={30}
+                color={buttonColorIn}
+              />
               <Text style={{ color: theme }}>Reset?</Text>
             </TouchableOpacity>
           ) : (
@@ -374,7 +448,7 @@ export default function Record() {
                 justifyContent: "center",
               }}
             >
-              <Ionicons name="play" size={40} color={theme} />
+              <Ionicons name="play" size={30} color={buttonColorIn} />
               <Text style={{ color: theme }}>Play</Text>
             </TouchableOpacity>
           )}
@@ -389,18 +463,21 @@ export default function Record() {
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
-              borderWidth: StyleSheet.hairlineWidth,
               borderColor: "black",
               borderRadius: 60,
               backgroundColor: !saveMusic
                 ? "gray"
                 : isRecording
-                ? "red"
-                : "lightgreen",
+                ? "lightyellow"
+                : themedBg,
             }}
           >
-            <Entypo name="modern-mic" size={50} color={"black"} />
-            <Text style={{ color: "black" }}>
+            <FontAwesome5
+              name="microphone-alt"
+              size={60}
+              color={buttonColorIn}
+            />
+            <Text style={{ color: theme }}>
               {isRecording ? "Finish" : !saveMusic ? "Loading" : "Start"}
             </Text>
           </TouchableOpacity>
@@ -427,9 +504,9 @@ export default function Record() {
               }}
             >
               {finished ? (
-                <MaterialIcons name="preview" size={40} color={theme} />
+                <MaterialIcons name="preview" size={30} color={buttonColorIn} />
               ) : (
-                <Ionicons name="musical-note" size={40} color={theme} />
+                <Ionicons name="musical-note" size={30} color={buttonColorIn} />
               )}
               <Text style={{ color: theme }}>
                 {finished ? "Preview" : "Key"}

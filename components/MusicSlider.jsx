@@ -15,8 +15,6 @@ import { EfxControls } from "@/hooks/Context/ProcessedAudio";
 const MusicSlider = ({ title, url, isMusicPlaying, setIsMusicPlaying, trackVolume, setTrackVolume, pauseTrack, resumeTrack }) => {
   
   const { setMusicWave } = useContext(Visualizer);
-  // const {trackVolume, setTrackVolume} = useContext(PlayerControls);
-  
 
 
   return (
@@ -45,7 +43,7 @@ const MusicSlider = ({ title, url, isMusicPlaying, setIsMusicPlaying, trackVolum
           width: "100%",
           height: "60%",
           padding: 0,
-          backgroundColor: "purple",
+          backgroundColor: "#4CC9F0",
           borderRadius: 10,
           flexDirection: "row",
           alignItems: "center",
@@ -60,9 +58,24 @@ const MusicSlider = ({ title, url, isMusicPlaying, setIsMusicPlaying, trackVolum
             backgroundColor: "orange",
             alignItems: "center",
             justifyContent: "center",
+            flexDirection: 'column',
+            gap: 5
           }}
         >
-          <Feather name="mic" size={30} color={"white"} />
+          <Feather name="mic" size={40} color={"#000"} />
+          <Slider
+            value={trackVolume}
+            maximumValue={1}
+            minimumValue={0}
+            onValueChange={(value) => {
+              setTrackVolume(value);
+            }}
+            style={{
+              width: "95%",
+              height: "20%",
+              borderColor: "blue",
+            }}
+          />
         </View>
         {isMusicPlaying ? (
           <Ionicons
@@ -79,23 +92,9 @@ const MusicSlider = ({ title, url, isMusicPlaying, setIsMusicPlaying, trackVolum
             color={"black"}
           />
         )}
-        <View style={{ width: "70%", height: "75%", alignItems: "center" }}>
+        <View style={{ width: "70%", height: "75%", alignItems: "center", justifyContent: 'center' }}>
           <WaveForm uri={url} setMusicWave={setMusicWave} />
-          <Slider
-            value={trackVolume}
-            maximumValue={1}
-            minimumValue={0}
-            onValueChange={(value) => {
-              setTrackVolume(value);
-            }}
-            style={{
-              width: "95%",
-              height: "20%",
-              position: "absolute",
-              bottom: "35%",
-              borderColor: "blue",
-            }}
-          />
+          
         </View>
       </View>
     </View>

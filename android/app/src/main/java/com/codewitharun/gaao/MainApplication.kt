@@ -13,6 +13,7 @@ import com.facebook.react.defaults.DefaultReactNativeHost
 import com.facebook.soloader.SoLoader
 import com.codewitharun.gaao.AudioProcessorPackage
 import com.codewitharun.gaao.GoogleAuthPackage
+import com.codewitharun.gaao.StoragePermissionPackage
 import managePermission.PermissionFilePackage
 
 import expo.modules.ApplicationLifecycleDispatcher
@@ -28,6 +29,7 @@ class MainApplication : Application(), ReactApplication {
                 packages.add(AudioProcessorPackage())
                 packages.add(GoogleAuthPackage())
                 packages.add(PermissionFilePackage())
+                packages.add(StoragePermissionPackage())
                 return packages
           }
 

@@ -155,11 +155,6 @@ const ReverbOptions = ({ vocals, title, name, setApplyReverb }) => {
               <Picker.Item key={idx} label={p.title} value={p.value} />
             ))}
         </Picker>
-        <ManualReverb
-          onApplyReverb={handleApplyReverb}
-          vocals={vocals}
-          title={name}
-        />
         <TouchableOpacity
           onPress={() => {
             efxList.push(efx);
@@ -170,19 +165,22 @@ const ReverbOptions = ({ vocals, title, name, setApplyReverb }) => {
           style={{
             width: "20%",
             height: "10%",
-            backgroundColor: "green",
-            position: "absolute",
-            bottom: 10,
-            right: 5,
+            backgroundColor: "#8E2DE2",
             borderRadius: 10,
             alignItems: "center",
             justifyContent: "center",
           }}
         >
-          <Text style={{ fontSize: 12, fontWeight: "bold", color: "black" }}>
+          <Text style={{ fontSize: 12, fontWeight: "bold", color: "white" }}>
             Apply-Changes
           </Text>
         </TouchableOpacity>
+        <ManualReverb
+          onApplyReverb={handleApplyReverb}
+          vocals={vocals}
+          title={name}
+        />
+        
       </View>
     </View>
   );

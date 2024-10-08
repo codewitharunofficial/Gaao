@@ -3,14 +3,17 @@ import React from "react";
 import { ThemedView } from "./ThemedView";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { ThemedText } from "./ThemedText";
+import { useThemeColor } from "@/hooks/useThemeColor";
 
 const ShortcutStrips = ({icon, color, title}) => {
+  
+  const themedBg = useThemeColor({light: '#FF69B4', dark: '#FFD700'})
   return (
     <TouchableOpacity
       activeOpacity={0.8}
       style={{
         flex: 0.48,
-        backgroundColor: "yellow",
+        backgroundColor: themedBg,
         height: 60,
         flexDirection: "row",
         alignItems: 'center', 

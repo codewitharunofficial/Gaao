@@ -5,15 +5,19 @@ import Entypo from "@expo/vector-icons/Entypo";
 import { ThemedText } from "./ThemedText";
 import { ThemedView } from "./ThemedView";
 import { Link } from "expo-router";
+import { useThemeColor } from "@/hooks/useThemeColor";
 
 const TrackCard = ({ coverPhoto, title, artists, lyrics, url, duration, format }) => {
+
+const themedBg = useThemeColor({light: "#4CC9F0", dark: "#0093E9"})
+
   return (
       <TouchableOpacity
         activeOpacity={0.8}
         style={{
           width: "100%",
           height: 80,
-          backgroundColor: "lightyellow",
+          backgroundColor: themedBg,
           flexDirection: "row",
           gap: 10,
           alignItems: "center",

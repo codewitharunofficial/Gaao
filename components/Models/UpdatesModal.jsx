@@ -6,6 +6,7 @@ import {
   Image,
   Dimensions,
   Button,
+  Alert,
 } from "react-native";
 import React, { useState } from "react";
 import { useUpdates } from "expo-updates";
@@ -15,11 +16,8 @@ import { downloadUpdates } from "@/constants/updates";
 const UpdatesModal = ({visible}) => {
   const { height } = Dimensions.get("screen");
   const [update, setUpdate] = useState();
+  const [isDownloaded, setIsDownloaded] = useState(false);
   const {
-    currentlyRunning,
-    isUpdateAvailable,
-    isUpdatePending,
-    isChecking,
     isDownloading
   } = useUpdates();
 
@@ -30,6 +28,18 @@ const UpdatesModal = ({visible}) => {
       const update = await Updates.fetchUpdateAsync();
       if (update.isNew) {
         setUpdate(update);
+        setIsDownloaded(true);
+        Alert.alert("Update Successful", `App is successfully Updated to ${update.manifest.runtimeVersion}`, [
+          {
+            text: "Apply Later",
+            onPress: () => {},
+            style: "cancel",
+          },
+          {
+            text: "Restart Now",
+            onPress: () => {Updates.reloadAsync(); setIsDownloaded(false)},
+          }
+        ]);
       }
     } catch (error) {
       console.log(error);

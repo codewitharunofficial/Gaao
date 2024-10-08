@@ -37,6 +37,7 @@ const ManualSync = ({ onApplySync, vocals, title, setSync }) => {
   return (
     <View style={styles.container}>
       <Text style={styles.label}>Delay-in-seconds</Text>
+      <View style={[styles.container, {flexDirection: 'row', alignItems: 'flex-start', justifyContent: 'space-between'}]} >
       <Slider
         style={styles.slider}
         minimumValue={-1}
@@ -50,12 +51,13 @@ const ManualSync = ({ onApplySync, vocals, title, setSync }) => {
           setCurrentDelayValue(value);
         }}
         minimumTrackTintColor="#1fb28a"
-        maximumTrackTintColor="#d3d3d3"
+        maximumTrackTintColor="#000"
         thumbTintColor="#b9e4c9"
       />
       <Text>{currentDelayValue}s</Text>
-      <TouchableOpacity onPress={() => {efxList.push(efx); setApplyEfx(false); setIsProcessing(true); setSync(false)}} style={{width: '20%', height: '10%', backgroundColor: 'green', position: 'absolute', bottom: 10, right: 5, borderRadius: 10, alignItems: 'center', justifyContent: 'center'}} >
-         <Text style={{fontSize: 12, fontWeight: 'bold', color: 'black'}} >Apply-Changes</Text>
+      </View>
+      <TouchableOpacity onPress={() => {efxList.push(efx); setApplyEfx(false); setIsProcessing(true); setSync(false)}} style={{width: '20%', height: '30%', backgroundColor: '#8E2DE2', borderRadius: 10, alignItems: 'center', justifyContent: 'center', alignSelf: 'flex-end'}} >
+         <Text style={{fontSize: 12, fontWeight: 'bold', color: 'white'}} >Apply-Changes</Text>
      </TouchableOpacity>
     </View>
   );
@@ -64,9 +66,9 @@ const ManualSync = ({ onApplySync, vocals, title, setSync }) => {
 const styles = StyleSheet.create({
   container: {
     padding: 10,
-    backgroundColor: "#fff",
+    // backgroundColor: "#fff",
     width: "100%",
-    height: "100%",
+    height: "auto",
   },
   label: {
     fontSize: 14,
@@ -74,7 +76,7 @@ const styles = StyleSheet.create({
     marginVertical: 5,
   },
   slider: {
-    width: "90%",
+    width: "80%",
     height: 40,
   },
 });
