@@ -7,6 +7,7 @@ import {
   ScrollView,
   Text,
   TouchableOpacity,
+  Dimensions,
 } from "react-native";
 import { Link, useLocalSearchParams } from "expo-router";
 import SimpleLineIcons from "@expo/vector-icons/SimpleLineIcons";
@@ -22,7 +23,6 @@ import { useThemeColor } from "@/hooks/useThemeColor";
 import { NativeModules } from "react-native";
 import LoadingScreen from "@/components/LoadingScreen";
 import Toast from "react-native-simple-toast";
-import * as MediaLibrary from "expo-media-library";
 import * as Sentry from "@sentry/react-native";
 import RNFS from 'react-native-fs';
 // import { NativeModules } from "expo-modules-core";
@@ -30,7 +30,7 @@ import RNFS from 'react-native-fs';
 export default function Record() {
   const { title, lyrics, artists, url, coverPhoto, format } =
     useLocalSearchParams();
-    const {StoragePermissionModule} = NativeModules;
+  // const { StoragePermissionModule } = NativeModules;
 
   const [fullScreen, setFullScreen] = useState(false);
   const [saveMusic, setSaveMusic] = useState();
@@ -50,48 +50,22 @@ export default function Record() {
   const [recordedMusic, setRecordedMusic] = useState();
   const { AudioProcessor } = NativeModules;
   const [loading, setLoading] = useState(false);
+  const [currentRecordingTime, setCurrentRecordingTime] = useState(0);
   const [isPemrission, setIsPermission] = useState(false);
 
-  const theme = useThemeColor({ light: "white", dark: "white" });
+  const theme = useThemeColor({ light: "black", dark: "white" });
   const themedBg = useThemeColor({ light: "#8E2DE2", dark: "#000" });
   const buttonColorIn = useThemeColor({ dark: "#E9C46A", light: "#F4A261" });
 
+  const { width, height } = Dimensions.get('window');
 
-  // async function askPermission(){
-  //   try {
-  //     const hasPermission = await StoragePermissionModule.checkStoragePermission();
-  //     console.log( "Permissions:", hasPermission);
-  //     if(!hasPermission){
-  //       const perm = await StoragePermissionModule.requestStoragePermission();
-  //       console.log("Asked Permissions", perm);
-  //       if(perm){
-  //         Toast.show("Permissions Approved", 3000);
-  //         return true
-  //       } else {
-  //         Toast.show("Please Give Storage Permissions", 2000);
-  //         return false;
-  //       }
-  //     } else {
-  //       Toast.show("Permissions Given Already", 3000);
-  //       return true;
-  //     }
-  //   } catch (error) {
-  //     console.error(error);
-  //   }
-  // } 
-
-  // useEffect(() => {
-  //   // getPermission();
-  //   //askPermission();
-  //   Toast.show(`File is in ${format}`, 3000);
-  // }, []);
 
   const checkIfAvailable = async () => {
     try {
       const data = await AsyncStorage.getItem(`${title}`);
       if (data) {
-        const uri = JSON.parse(data);
-        setSaveMusic(uri);
+        // const uri = JSON.parse(data);
+        setSaveMusic(data);
         return true;
       } else {
         console.log("Offline Not Available");
@@ -108,53 +82,26 @@ export default function Record() {
 
   async function downloadMusic() {
     try {
-     const musicUrl = url;
-     const filePath = `${RNFS.CachesDirectoryPath}_audio_${Date.now()}`;
-     
-     const result = await RNFS.downloadFile({fromUrl: url, toFile: filePath}).promise;
-     console.log("File Saved At: ", filePath);
-     console.log(result.statusCode);
-     if(result.statusCode === 200){
-       Toast.show(`File Saved at: ${filePath}`, 2000);
-       setSaveMusic(filePath);
-     } else {
-      Toast.show("Error Downloading the track...!", 2000);
-     }
+      const filePath = `${RNFS.CachesDirectoryPath}_audio_${Date.now()}`;
+
+      const Available = await checkIfAvailable();
+
+      if (!Available) {
+        const result = await RNFS.downloadFile({ fromUrl: url, toFile: filePath }).promise;
+        if (result.statusCode === 200) {
+          await AsyncStorage.setItem(`${title}`, `${filePath}`);
+          setSaveMusic(filePath);
+        } else {
+          Toast.show("Error Downloading the track...!", 2000);
+        }
+      }
+
     } catch (error) {
-     console.log(error);
-     Toast.show(error.message, 2000);
+      console.log(error);
+      Toast.show(error.message, 2000);
     }
   }
 
-  // async function downloadMusic() {
-  //   try {
-  //     const isAvailable = await checkIfAvailable();
-  //     if (!isAvailable) {
-  //       const fileUri = `${FileSystem.documentDirectory}_${Date.now()}.${format}`;
-  //       console.log("File URI:", fileUri);
-  //       const { uri } = await FileSystem.downloadAsync(url, fileUri, {
-  //         headers: {
-  //           Authorization: "Bearer token",
-  //         },
-  //         md5: true,
-  //         cache: true,
-  //       });
-  //       console.log(`Saved URI:`, uri);
-  //       if (uri) {
-  //         await AsyncStorage.setItem(`${title}`, JSON.stringify(uri));
-  //         setSaveMusic(uri);
-  //       } else {
-  //         Toast.show("Download Failed", 2000);
-  //       }
-  //     } else {
-  //       return;
-  //     }
-  //   } catch (error) {
-  //     console.log(error);
-  //     Toast.show(error.message, 2000);
-  //     Sentry.captureException(error);
-  //   }
-  // }
 
   async function loadMusic() {
     try {
@@ -253,18 +200,21 @@ export default function Record() {
         allowsRecordingIOS: true,
         playsInSilentModeIOS: true,
       });
-
-      console.log("Starting Recording...");
+      // console.log("Starting Recording...");
       setIsRecording(true);
-      autoPlayTrack();
-      setStartPosition(0);
       const { recording } = await Audio.Recording.createAsync(
         Audio.RecordingOptionsPresets.HIGH_QUALITY
       );
       setRecordedTrack(recording);
+      setStartPosition(0);
+      await Promise.all([
+        autoPlayTrack(),
+        recording.startAsync(),
+      ]);
 
       recording.setOnRecordingStatusUpdate((status) => {
         if (status.isRecording) {
+          setCurrentRecordingTime(status.durationMillis);
         }
       });
     } catch (error) {
@@ -282,9 +232,8 @@ export default function Record() {
       const uri = recordedTrack.getURI();
 
       if (uri) {
-        const fileUri = `${
-          FileSystem.cacheDirectory
-        }${Date.now()}_recording_.wav`;
+        const fileUri = `${FileSystem.cacheDirectory
+          }${Date.now()}_recording_.wav`;
         await FileSystem.moveAsync({ from: uri, to: fileUri });
         setVocals(fileUri);
         console.log("Vocals Saved at:", fileUri);
@@ -292,10 +241,8 @@ export default function Record() {
       setLoading(true);
 
       if (uri) {
-        const outPutFilePAth = `${
-          FileSystem.cacheDirectory
-        }_trimmed_${Date.now()}.${format}`;
-        console.log(outPutFilePAth);
+        const outPutFilePAth = `${FileSystem.cacheDirectory
+          }_trimmed_${Date.now()}.${format}`;
         const music = await AudioProcessor.trimAudio(
           saveMusic,
           outPutFilePAth,
@@ -319,9 +266,6 @@ export default function Record() {
     setProcessedVocals(null);
   }, []);
 
-  // useEffect(() => {
-  //    createDirectories();
-  // }, [])
 
   return (
     <SafeAreaView style={{ width: "100%", height: "100%", paddingTop: "5%" }}>
@@ -333,6 +277,7 @@ export default function Record() {
           alignItems: "center",
           gap: 5,
           backgroundColor: themedBg,
+          paddingVertical: '5%'
         }}
       >
         <View
@@ -361,7 +306,7 @@ export default function Record() {
           style={{
             width: "90%",
             height: "30%",
-            backgroundColor: "#4CC9F0",
+            backgroundColor: fullScreen ? "rgba(156, 156, 156, 0.3)" : "#4CC9F0",
             borderTopLeftRadius: 10,
             borderTopRightRadius: 10,
             padding: 20,
@@ -378,10 +323,10 @@ export default function Record() {
           />
           <Text
             style={{
-              fontSize: 30,
               textAlign: "center",
               lineHeight: 52,
               margin: 15,
+              fontSize: 20
             }}
           >
             {lyrics}
@@ -468,8 +413,8 @@ export default function Record() {
               backgroundColor: !saveMusic
                 ? "gray"
                 : isRecording
-                ? "lightyellow"
-                : themedBg,
+                  ? "lightyellow"
+                  : themedBg,
             }}
           >
             <FontAwesome5
@@ -478,7 +423,7 @@ export default function Record() {
               color={buttonColorIn}
             />
             <Text style={{ color: theme }}>
-              {isRecording ? "Finish" : !saveMusic ? "Loading" : "Start"}
+              {isRecording ? `Finish ${Math.floor(currentRecordingTime / 1000)}s` : !saveMusic ? "Loading..." : "Start"}
             </Text>
           </TouchableOpacity>
           <Link

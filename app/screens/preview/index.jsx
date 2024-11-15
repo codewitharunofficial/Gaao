@@ -30,6 +30,7 @@ import { pauseTrack, resumeTrack } from "@/constants/playerNodes";
 import * as Sentry from '@sentry/react-native';
 import MixedTrack from "@/components/MixedTrack";
 import AntDesign from "@expo/vector-icons/AntDesign";
+import { Ionicons, MaterialIcons } from "@expo/vector-icons";
 
 const PreviewScreen = () => {
   const { AudioProcessor } = NativeModules;
@@ -367,17 +368,41 @@ const PreviewScreen = () => {
             />
           )}
         </View>
+        <View style={{width: '90%', height: '8%', flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between'}} >
         <TouchableOpacity
           onPress={() => {
             setEfxList([]);
             setIsProcessing(false);
             setProcessedVocals(vocals);
           }}
-          style={{width: 'auto', height: '5%', backgroundColor: 'red', padding: 8, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 10, marginTop: 10, borderRadius: 10}}
+          style={{width: 'auto', height: '90%', backgroundColor: 'yellow', padding: 8, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 10, marginTop: 10, borderRadius: 10}}
+        >
+          <Ionicons name="arrow-undo" size={20} color={"#000"} />
+          <Text style={{fontSize: 16, fontWeight: '400', color: '#000'}} >Undo</Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          onPress={() => {
+            setEfxList([]);
+            setIsProcessing(false);
+            setProcessedVocals(vocals);
+          }}
+          style={{width: 'auto', height: '90%', backgroundColor: 'red', padding: 8, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 10, marginTop: 10, borderRadius: 10}}
         >
           <AntDesign name="delete" size={20} color={"white"} />
-          <Text style={{fontSize: 16, fontWeight: '400', color: '#ffffff'}} >Discard-Changes</Text>
+          <Text style={{fontSize: 16, fontWeight: '400', color: '#ffffff'}} >Discard-All</Text>
         </TouchableOpacity>
+        <TouchableOpacity
+          onPress={() => {
+            setEfxList([]);
+            setIsProcessing(false);
+            setProcessedVocals(vocals);
+          }}
+          style={{width: 'auto', height: '90%', backgroundColor: 'green', padding: 8, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 10, marginTop: 10, borderRadius: 10}}
+        >
+          <Text style={{fontSize: 16, fontWeight: '400', color: '#ffffff'}} >Re-Do</Text>
+          <Ionicons name="arrow-redo" size={20} color={"white"} />
+        </TouchableOpacity>
+        </View>
         <View
           style={{
             width: "100%",

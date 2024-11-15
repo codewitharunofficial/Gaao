@@ -25,6 +25,11 @@ const EqualizerOptions = ({ vocals, title, name, setApplyEQ }) => {
   const { currentEfx, setCurrentEfx } = useContext(EfxControls);
   const { isProcessing, setIsProcessing } = useContext(EfxControls);
   const { efxList, setEfxList } = useContext(EfxControls);
+  const [values, setValues] = useState({
+    bassGain: 0,
+    midGain: 0,
+    trebleGain: 0,
+  });
 
   const applyEqualizer = async (filePath, presetName) => {
     try {
@@ -46,31 +51,64 @@ const EqualizerOptions = ({ vocals, title, name, setApplyEQ }) => {
     }
   }, [selectedPreset, applyEfx]);
 
+  const setPresetValues = (itemValue) => {
+    preset.find((efx) => {
+      if (efx.title === itemValue) {
+        setValues(efx.values);
+      }
+    });
+  };
+
   const preset = [
     {
       id: 0,
-      value: "BassBoost",
+      value: "Bass-Boost",
       title: "Bass-Boost",
+      values: {
+        bassGain: 6, // Boost for bass frequencies
+        midGain: 0, // Neutral gain for mid frequencies
+        trebleGain: -2, // Slight reduction in treble frequencies to enhance bass feel
+      },
     },
     {
       id: 1,
-      value: "MidBoost",
+      value: "Mid-Boost",
       title: "Mid-Boost",
+      values: {
+        bassGain: -1, // Slight reduction in bass frequencies to clear midrange
+        midGain: 5, // Boost for mid frequencies
+        trebleGain: 0, // Neutral for treble frequencies
+      },
     },
     {
       id: 2,
-      value: "TrebleBoost",
+      value: "Treble-Boost",
       title: "Treble-Boost",
+      values: {
+        bassGain: -2, // Slight reduction in bass frequencies to enhance treble clarity
+        midGain: 0, // Neutral for mid frequencies
+        trebleGain: 6, // Boost for treble frequencies for clarity and brightness
+      },
     },
     {
       id: 3,
-      value: "VocalEnhance",
+      value: "Vocal-Enhance",
       title: "Vocal-Enhance",
+      values: {
+        bassGain: -1, // Slight reduction in bass to clear up vocal frequencies
+        midGain: 4, // Boost in mid frequencies to enhance vocals
+        trebleGain: 3, // Slight boost in treble for clarity and presence
+      },
     },
     {
       id: 4,
       value: "Default",
       title: "Default",
+      values: {
+        bassGain: 0, // No boost or cut in bass frequencies
+        midGain: 0, // No boost or cut in mid frequencies
+        trebleGain: 0, // No boost or cut in treble frequencies
+      },
     },
   ];
 
@@ -121,6 +159,7 @@ const EqualizerOptions = ({ vocals, title, name, setApplyEQ }) => {
             setSelectedPreset(itemValue);
             setApplyEfx(true);
             setCurrentEfx(itemValue);
+            setPresetValues(itemValue);
             // playBothTracks();
             if (currentEfx !== appliedEfx) {
               setAppliedEfx(itemValue);
@@ -162,8 +201,8 @@ const EqualizerOptions = ({ vocals, title, name, setApplyEQ }) => {
           onApplyEqualizer={handleManualEqualizer}
           vocals={vocals}
           title={name}
+          values={values}
         />
-        
       </View>
     </View>
   );

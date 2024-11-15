@@ -3,7 +3,7 @@ import { View, Text, StyleSheet, Button, ScrollView } from 'react-native';
 import Slider from '@react-native-community/slider';
 import * as FileSystem from 'expo-file-system';
 
-const ManualEqualizer = ({ onApplyEqualizer, vocals, title }) => {
+const ManualEqualizer = ({ onApplyEqualizer, vocals, title, values }) => {
     const [bassGain, setBassGain] = useState(1);
     const [treble, setTreble] = useState(8);
     const [midGain, setMidGain] = useState(3);
@@ -33,9 +33,9 @@ const ManualEqualizer = ({ onApplyEqualizer, vocals, title }) => {
             <Text style={styles.label}>Bass-Gain</Text>
             <Slider
                 style={styles.slider}
-                minimumValue={0}
-                maximumValue={100}
-                value={bassGain}
+                minimumValue={-10}
+                maximumValue={10}
+                value={values.bassGain}
                 onSlidingComplete={value => {setBassGain(value); setApplyEfx(true)}}
                 minimumTrackTintColor="#1fb28a"
                 maximumTrackTintColor="#d3d3d3"
@@ -44,9 +44,9 @@ const ManualEqualizer = ({ onApplyEqualizer, vocals, title }) => {
             <Text style={styles.label}>Mid-Gain</Text>
             <Slider
                 style={styles.slider}
-                minimumValue={0}
-                maximumValue={100}
-                value={midGain}
+                minimumValue={-10}
+                maximumValue={10}
+                value={values.midGain}
                 onSlidingComplete={value => {setMidGain(value); setApplyEfx(true)}}
                 minimumTrackTintColor="#1fb28a"
                 maximumTrackTintColor="#d3d3d3"
@@ -55,9 +55,9 @@ const ManualEqualizer = ({ onApplyEqualizer, vocals, title }) => {
             <Text style={styles.label}>Treble-Gain</Text>
             <Slider
                 style={styles.slider}
-                minimumValue={0}
-                maximumValue={100}
-                value={treble}
+                minimumValue={-10}
+                maximumValue={10}
+                value={values.trebleGain}
                 onSlidingComplete={value => {setTreble(value); setApplyEfx(true)}}
                 minimumTrackTintColor="#1fb28a"
                 maximumTrackTintColor="#d3d3d3"

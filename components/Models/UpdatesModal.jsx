@@ -11,10 +11,9 @@ import {
 import React, { useState } from "react";
 import { useUpdates } from "expo-updates";
 import * as Updates from "expo-updates";
-import { downloadUpdates } from "@/constants/updates";
 
 const UpdatesModal = ({visible}) => {
-  const { height } = Dimensions.get("screen");
+  const { height, width } = Dimensions.get("screen");
   const [update, setUpdate] = useState();
   const [isDownloaded, setIsDownloaded] = useState(false);
   const {
@@ -48,7 +47,7 @@ const UpdatesModal = ({visible}) => {
 
   return (
     <Modal transparent={false} animationType="fade" visible={visible}>
-      <View style={[styles.container, { height: height }]}>
+      <View style={[styles.container, { height: height, width: width * 0.8 }]}>
         <View style={styles.loader}>
           <Image
             source={require("@/assets/images/Gaao-Icon.png")}
@@ -63,7 +62,7 @@ const UpdatesModal = ({visible}) => {
           ) : (
             <View
               style={{
-                width: "100%",
+                width: width,
                 height: "auto",
                 flexDirection: "row",
                 alignItems: "center",

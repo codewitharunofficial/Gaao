@@ -27,6 +27,12 @@ const ReverbOptions = ({ vocals, title, name, setApplyReverb }) => {
   const { currentEfx, setCurrentEfx } = useContext(EfxControls);
   const { isProcessing, setIsProcessing } = useContext(EfxControls);
   const { efxList, setEfxList } = useContext(EfxControls);
+  const [presetValues, setPresetValues] = useState({
+    room_size: 0.6,
+    decay: 0.5,
+    wet: 0.8,
+    dry: 0.4,
+  });
 
   const applyReverb = async (filePath, presetName) => {
     console.log(presetName);
@@ -54,46 +60,100 @@ const ReverbOptions = ({ vocals, title, name, setApplyReverb }) => {
       id: 0,
       value: "SmallRoom",
       title: "Small-Room",
+      values: {
+        room_size: 0.3,
+        decay: 0.2,
+        wet: 0.5,
+        dry: 0.6,
+      },
     },
     {
       id: 1,
       value: "Cathedral",
       title: "Cathedral",
+      values: {
+        room_size: 1.0,
+        decay: 0.8,
+        wet: 0.95,
+        dry: 0.2,
+      },
     },
     {
       id: 2,
       value: "BrightRoom",
       title: "Bright-Room",
+      values: {
+        room_size: 0.4,
+        decay: 0.3,
+        wet: 0.7,
+        dry: 0.6,
+      },
     },
     {
       id: 3,
       value: "DarkHall",
       title: "Dark-Hall",
+      values: {
+        room_size: 0.85,
+        decay: 0.7,
+        wet: 0.9,
+        dry: 0.2,
+      },
     },
     {
       id: 4,
       value: "LargeHall",
       title: "Large-Hall",
+      values: {
+        room_size: 1.0,
+        decay: 0.6,
+        wet: 0.85,
+        dry: 0.4,
+      },
     },
     {
       id: 5,
       value: "Plate",
       title: "Plate",
+      values: {
+        room_size: 0.3,
+        decay: 0.3,
+        wet: 0.6,
+        dry: 0.5,
+      },
     },
     {
       id: 6,
       value: "Vintage",
       title: "Vintage",
+      values: {
+        room_size: 0.5,
+        decay: 0.5,
+        wet: 0.7,
+        dry: 0.6,
+      },
     },
     {
       id: 7,
       value: "Ambient",
       title: "Ambient",
+      values: {
+        room_size: 0.75,
+        decay: 0.5,
+        wet: 0.7,
+        dry: 0.5,
+      },
     },
     {
       id: 8,
       value: "Default",
       title: "Default",
+      values: {
+        room_size: 0.6,
+        decay: 0.5,
+        wet: 0.8,
+        dry: 0.4,
+      },
     },
   ];
 
@@ -113,6 +173,14 @@ const ReverbOptions = ({ vocals, title, name, setApplyReverb }) => {
     type: "Reverb",
     preset: currentEfx,
     values: [],
+  };
+
+  const setValues = (itemValue) => {
+    preset.find((efx) => {
+      if (efx.title === itemValue) {
+        setPresetValues(efx.values);
+      }
+    });
   };
 
   return (
@@ -145,6 +213,7 @@ const ReverbOptions = ({ vocals, title, name, setApplyReverb }) => {
             setSelectedPreset(itemValue);
             setApplyEfx(true);
             setCurrentEfx(itemValue);
+            setValues(itemValue);
             if (currentEfx !== appliedEfx) {
               setAppliedEfx(itemValue);
             }
@@ -179,8 +248,8 @@ const ReverbOptions = ({ vocals, title, name, setApplyReverb }) => {
           onApplyReverb={handleApplyReverb}
           vocals={vocals}
           title={name}
+          values={presetValues}
         />
-        
       </View>
     </View>
   );

@@ -24,6 +24,14 @@ const CompressorOptions = ({ vocals, title, name, setApplyCompressor }) => {
   const { currentEfx, setCurrentEfx } = useContext(EfxControls);
   const { isProcessing, setIsProcessing } = useContext(EfxControls);
   const { efxList, setEfxList } = useContext(EfxControls);
+  const [values, setValues] = useState({
+    threshold: 0,
+    ratio: 1,
+    attack: 10,
+    release: 50,
+    knee: 0,
+    makeupGain: 0,
+  });
 
   const applyCompressor = async (filePath, presetName) => {
     try {
@@ -48,30 +56,66 @@ const CompressorOptions = ({ vocals, title, name, setApplyCompressor }) => {
   const preset = [
     {
       id: 0,
-      value: "LightCompression",
-      title: "Light-Compression",
+      value: "MediumCompression",
+      title: "Medium Compression",
+      values: {
+        threshold: -15, // Threshold (in dB) where compression starts
+        ratio: 4, // Compression ratio (e.g., 4:1)
+        attack: 20, // Attack time (in ms)
+        release: 200, // Release time (in ms)
+        knee: 5, // Knee setting (dB) for smoother compression onset
+        makeupGain: 2, // Makeup gain to maintain output level (in dB)
+      },
     },
     {
       id: 1,
-      value: "MediumCompression",
-      title: "Medium-Compression",
+      value: "HeavyCompression",
+      title: "Heavy Compression",
+      values: {
+        threshold: -20, // Lower threshold for stronger compression
+        ratio: 8, // High compression ratio (8:1)
+        attack: 10, // Short attack time to compress transients quickly
+        release: 300, // Longer release to maintain compression
+        knee: 8, // Higher knee for a smoother onset
+        makeupGain: 3, // More makeup gain to compensate for higher compression
+      },
     },
     {
       id: 2,
-      value: "HeavyCompression",
-      title: "Heavy-Compression",
+      value: "VocalBoost",
+      title: "Vocal Boost",
+      values: {
+        threshold: -12, // Threshold set for vocal peaks
+        ratio: 3, // Gentle compression (3:1) to control peaks without losing dynamics
+        attack: 25, // Moderate attack time to preserve vocal nuances
+        release: 150, // Faster release for vocal clarity
+        knee: 4, // Soft knee for smooth transitions
+        makeupGain: 4, // Boosted makeup gain to make vocals more present
+      },
     },
     {
       id: 3,
-      value: "VocalBoost",
-      title: "Vocal Boost",
-    },
-    {
-      id: 4,
       value: "Default",
       title: "Default",
+      values: {
+        threshold: 0, // No compression by default
+        ratio: 1, // Ratio set to 1:1 for no compression effect
+        attack: 10, // Minimal attack (irrelevant in no-compression)
+        release: 50, // Minimal release (irrelevant in no-compression)
+        knee: 0, // No knee
+        makeupGain: 0, // No makeup gain
+      },
     },
   ];
+
+
+  const setPresetValues = (itemValue) => {
+    preset.find((efx) => {
+      if(efx.value === itemValue){
+        setValues(efx.values)
+      }
+    })
+  }
 
   const handleManualCompressor = (
     vocals,
@@ -158,8 +202,8 @@ const CompressorOptions = ({ vocals, title, name, setApplyCompressor }) => {
           onApplyCompressor={handleManualCompressor}
           vocals={vocals}
           title={name}
+          values={values}
         />
-        
       </View>
     </View>
   );

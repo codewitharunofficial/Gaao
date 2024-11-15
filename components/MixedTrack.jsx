@@ -1,4 +1,4 @@
-import { Dimensions, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { ActivityIndicator, Dimensions, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import React, { useContext, useEffect, useState } from "react";
 import { ThemedText } from "./ThemedText";
 import Feather from "@expo/vector-icons/Feather";
@@ -127,9 +127,14 @@ const width = Dimensions.get("window").width;
           />
         </View>
       </View>
-      <TouchableOpacity onPress={() => saveToDevice()} style={{width: 'auto', height: 'auto', padding: 10, backgroundColor: 'lightgreen', alignSelf: 'center', alignItems: 'center', justifyContent: 'center'}} >
-      <Entypo size={25} name="download" color={"black"} />
-      <Text style={{color: 'black'}} >{isDownloading ? "Saving..." : "Save To Device"}</Text>
+      <TouchableOpacity onPress={() => saveToDevice()} style={{width: 'auto', height: 'auto', padding: 10, backgroundColor: 'lightgreen', alignSelf: 'center', alignItems: 'center', justifyContent: 'center', borderRadius: 20}} >
+      {
+        isDownloading ? (
+         <ActivityIndicator color={'#000'} size={25} />
+        ) : (
+          <Entypo size={25} name="download" color={"black"} />
+        )
+      }
       </TouchableOpacity>
     </View>
      </ModalContent>

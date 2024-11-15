@@ -19,7 +19,7 @@ const LoadingScreen = ({ visible }) => {
         <View style={styles.loader}>
           <Image
             source={require("@/assets/images/Gaao-Icon.png")}
-            style={{ width: 60, height: 60, alignSelf: 'center'}}
+            style={{ width: 60, height: 60, alignSelf: 'center', borderRadius: 50}}
           />
           <ActivityIndicator size={"small"} color={"lightblue"} />
           <Text style={{ color: "white", fontSize: 14, alignSelf: 'center' }}>

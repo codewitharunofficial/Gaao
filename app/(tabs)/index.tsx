@@ -4,9 +4,7 @@ import {
   ScrollView,
   SafeAreaView,
   View,
-  Alert,
-  PermissionsAndroid
-} from "react-native";
+  Dimensions} from "react-native";
 import { useContext, useEffect, useState } from "react";
 import { ThemedView } from "@/components/ThemedView";
 import ShortcutStrips from "@/components/ShortcutStrips";
@@ -22,6 +20,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as Sentry from "@sentry/react-native";
 import Toast from 'react-native-simple-toast';
 import { askForPermissions, getPermissions } from "@/constants/permissions";
+import RecentlyUpdated from "@/components/RecentlyUpdated";
 
 export default function HomeScreen() {
   const { user } = useContext(Auth);
@@ -29,7 +28,10 @@ export default function HomeScreen() {
   const { currentlyRunning, isUpdateAvailable } = useUpdates();
   const visible = isUpdateAvailable;
 
+  const defaultHeadImage = require('@/assets/images/newly-added.webp');
+
   const themedBg = useThemeColor({ light: "#F3F4F6", dark: "#0B090A" });
+  const {width, height} = Dimensions.get('window');
 
   async function AskPermission() {
     await ManageExternalStorage?.checkAndGrantPermission(
@@ -41,22 +43,6 @@ export default function HomeScreen() {
         AsyncStorage.setItem("manageStorage", "true");
       }
     );
-  }
-
-  const checkStoragePermissions = async () => {
-    try {
-      const status1 = await PermissionsAndroid.check("android.permission.READ_MEDIA_IMAGES");
-      const status2 = await PermissionsAndroid.check("android.permission.READ_MEDIA_VIDEO");
-      console.log(status1, status2);
-      Toast.show(`${status1} &${status2}`, 3000);
-      if(!status1 && status2 || status1 && !status2 || !status1 && !status2){
-        const status = await PermissionsAndroid.request("android.permission.READ_MEDIA_IMAGES");
-        Toast.show(`${status}`, 3000);
-        console.log(status);
-      }
-    } catch (error) {
-      console.error(error)
-    }
   }
 
   useEffect(() => {
@@ -77,10 +63,6 @@ export default function HomeScreen() {
       console.error(error);
     }
   }
-
-  useEffect(() => {
-    checkAndGetPermissions();
-  });
 
   useEffect(() => {
     if( !__DEV__){
@@ -119,10 +101,23 @@ export default function HomeScreen() {
           paddingBottom: "5%",
         }}
       >
-        <Image
-          source={require("@/assets/images/newly-added.webp")}
-          style={styles.reactLogo}
-        />
+        {
+          tracks?.length > 0 ? (
+
+            <Image
+              source={{uri: tracks[0]?.karaokeCoverPhoto.secure_url}}
+              style={styles.reactLogo}
+              resizeMode="stretch"
+            />
+          ) : (
+            <Image
+              source={defaultHeadImage}
+              style={styles.reactLogo}
+              resizeMode="stretch"
+            />
+          )
+        }
+        {/* <RecentlyUpdated tracks={tracks} width={width * 0.3} /> */}
         <ThemedView
           style={{
             width: "100%",

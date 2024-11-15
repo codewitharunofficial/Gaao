@@ -3,7 +3,7 @@ import { View, Text, StyleSheet, Button, ScrollView } from 'react-native';
 import Slider from '@react-native-community/slider';
 import * as FileSystem from 'expo-file-system';
 
-const ManualCompressor = ({ onApplyCompressor, vocals, title }) => {
+const ManualCompressor = ({ onApplyCompressor, vocals, title, values }) => {
     const [ratio, setRatio] = useState(1);
     const [attack, setAttack] = useState(0);
     const [threshold, setThreshold] = useState(10);
@@ -37,9 +37,9 @@ const ManualCompressor = ({ onApplyCompressor, vocals, title }) => {
             <Text style={styles.label}>Ratio</Text>
             <Slider
                 style={styles.slider}
-                minimumValue={0}
-                maximumValue={100}
-                value={ratio}
+                minimumValue={1}
+                maximumValue={10}
+                value={values.ratio}
                 onSlidingComplete={value => {setRatio(value); setApplyEfx(true)}}
                 minimumTrackTintColor="#1fb28a"
                 maximumTrackTintColor="#d3d3d3"
@@ -48,9 +48,9 @@ const ManualCompressor = ({ onApplyCompressor, vocals, title }) => {
             <Text style={styles.label}>Threshold</Text>
             <Slider
                 style={styles.slider}
-                minimumValue={0}
-                maximumValue={100}
-                value={threshold}
+                minimumValue={-20}
+                maximumValue={30}
+                value={values.threshold}
                 onSlidingComplete={value => {setThreshold(value); setApplyEfx(true)}}
                 minimumTrackTintColor="#1fb28a"
                 maximumTrackTintColor="#d3d3d3"
@@ -59,9 +59,9 @@ const ManualCompressor = ({ onApplyCompressor, vocals, title }) => {
             <Text style={styles.label}>Attack</Text>
             <Slider
                 style={styles.slider}
-                minimumValue={100}
-                maximumValue={1000}
-                value={attack}
+                minimumValue={1}
+                maximumValue={50}
+                value={values.attack}
                 onSlidingComplete={value => {setAttack(value); setApplyEfx(true)}}
                 minimumTrackTintColor="#1fb28a"
                 maximumTrackTintColor="#d3d3d3"
@@ -70,9 +70,9 @@ const ManualCompressor = ({ onApplyCompressor, vocals, title }) => {
             <Text style={styles.label}>Release</Text>
             <Slider
                 style={styles.slider}
-                minimumValue={100}
-                maximumValue={1000}
-                value={release}
+                minimumValue={50}
+                maximumValue={500}
+                value={values.release}
                 onSlidingComplete={value => {setRelease(value); setApplyEfx(true)}}
                 minimumTrackTintColor="#1fb28a"
                 maximumTrackTintColor="#d3d3d3"
@@ -82,8 +82,8 @@ const ManualCompressor = ({ onApplyCompressor, vocals, title }) => {
             <Slider
                 style={styles.slider}
                 minimumValue={0}
-                maximumValue={100}
-                value={makeupGain}
+                maximumValue={10}
+                value={values.makeupGain}
                 onSlidingComplete={value => {setMakeUpGain(value); setApplyEfx(true)}}
                 minimumTrackTintColor="#1fb28a"
                 maximumTrackTintColor="#d3d3d3"

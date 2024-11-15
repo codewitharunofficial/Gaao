@@ -1,4 +1,5 @@
 import {
+  Dimensions,
   Image,
   SafeAreaView,
   StyleSheet,
@@ -18,6 +19,7 @@ import { googleSignIn } from "@/constants/functions";
 
 const index = () => {
   const { user, setUser } = useContext(Auth);
+  const {width, height} = Dimensions.get('window');
 
   const router = useRouter();
 
@@ -61,9 +63,6 @@ const index = () => {
     }
   };
 
-
-  
-
   const handleSignIn = async () => {
     try {
       const userDetails = await googleSignIn();
@@ -87,64 +86,60 @@ const index = () => {
   };
 
   return (
-    <SafeAreaView style={{ width: "100%", height: "100%" }}>
+    <SafeAreaView style={{ width: width, height: height }}>
       <ThemedView
         style={{
-          width: "100%",
-          height: "100%",
+          width: width,
+          height: height,
           flexDirection: "column",
           alignItems: "center",
           alignSelf: "center",
           justifyContent: "center",
-          gap: 10,
+          gap: 20,
         }}
       >
         <Image
           source={require("@/assets/images/Gaao-Icon.png")}
           style={{
-            width: "20%",
-            height: "20%",
-            resizeMode: "contain",
-            borderRadius: 20,
+            width: 100,
+            height: 100,
+            resizeMode: "stretch",
+            borderRadius: 50,
           }}
         />
-
+        <ThemedText>Explore Gaao..!! Happy Singing</ThemedText>
         <TouchableOpacity
           onPress={() => {
             handleSignUp();
           }}
           style={{
-            width: "auto",
-            height: "5%",
+            width: width / 2.5,
+            height: height / 20,
             flexDirection: "row",
             alignItems: "center",
             justifyContent: "space-between",
-            backgroundColor: "lightblue",
+            backgroundColor: "#fff",
             borderRadius: 20,
-            paddingHorizontal: 10,
+            paddingHorizontal: 10
           }}
         >
-          {/* <Link href={"/(tabs)"} replace={true} > */}
-          <AntDesign name="google" color={"black"} size={24} />
-          <ThemedText>Sign Up With Google</ThemedText>
-          {/* </Link> */}
+          <Image source={require('@/assets/images/GoogleSignUp.png')} resizeMode="contain" style={{width: width / 3, height: height/20, borderRadius: 20}} />
         </TouchableOpacity>
         <TouchableOpacity
           onPress={() => handleSignIn()}
           style={{
-            width: "auto",
-            height: "5%",
+            width: width / 2.5,
+            height: height / 20,
             flexDirection: "row",
             alignItems: "center",
             justifyContent: "space-between",
-            backgroundColor: "lightblue",
+            backgroundColor: "orange",
             borderRadius: 20,
-            paddingHorizontal: 10,
+            paddingHorizontal: 10
           }}
         >
-          {/* <Link href={"/(tabs)"} replace={true} > */}
-          <AntDesign name="google" color={"black"} size={24} />
-          <ThemedText>Sign In With Google</ThemedText>
+
+          <Image source={require('@/assets/images/GoogleSignIn.png')} resizeMode="contain" style={{width: width / 3, height: 50}} />
           {/* </Link> */}
         </TouchableOpacity>
       </ThemedView>
